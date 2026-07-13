@@ -2,59 +2,96 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-6xl flex-col items-center justify-center py-32 px-8">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold tracking-tight text-black dark:text-zinc-50 mb-6">
-            Welcome to Dropship
-          </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            Quality products at great prices. Shop our curated collection of
-            trending items.
+    <div>
+      {/* Hero */}
+      <section className="relative w-full h-[520px] md:h-[640px] bg-black flex items-center justify-center overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1600&q=80"
+          alt="Athletic training"
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        />
+        <div className="absolute inset-0 bg-[#111111CC]" />
+        <div className="relative z-10 text-center px-4 max-w-[700px]">
+          <p className="font-[Roboto] font-bold text-[12px] text-white/70 mb-4 tracking-wide">
+            NEW COLLECTION
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-lg border border-zinc-200 dark:border-zinc-800">
-            <div className="text-4xl mb-4">🛍️</div>
-            <h3 className="text-xl font-semibold mb-2 text-black dark:text-zinc-50">
-              Trending Products
-            </h3>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Discover what&apos;s popular right now
-            </p>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-lg border border-zinc-200 dark:border-zinc-800">
-            <div className="text-4xl mb-4">🚚</div>
-            <h3 className="text-xl font-semibold mb-2 text-black dark:text-zinc-50">
-              Fast Shipping
-            </h3>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Get your orders delivered quickly
-            </p>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-8 shadow-lg border border-zinc-200 dark:border-zinc-800">
-            <div className="text-4xl mb-4">✨</div>
-            <h3 className="text-xl font-semibold mb-2 text-black dark:text-zinc-50">
-              Quality Assured
-            </h3>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Only the best products make it here
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-16">
+          <h1 className="font-[Montserrat] font-bold text-[36px] md:text-[48px] leading-[1.1] text-white mb-6">
+            PUSH YOUR LIMITS
+          </h1>
+          <p className="font-[Roboto] text-[16px] text-white/80 mb-8 leading-[24px] max-w-[480px] mx-auto">
+            Engineered performance gear for athletes who refuse to settle. Built to move with you.
+          </p>
           <Link
             href="/products"
-            className="inline-flex items-center justify-center rounded-full bg-black text-white px-8 py-4 text-lg font-medium hover:bg-zinc-800 transition-colors dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+            className="inline-block bg-white text-black font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#E5E7EB] transition-colors"
           >
-            Browse Products →
+            Shop Now
           </Link>
         </div>
-      </main>
+      </section>
+
+      {/* Features */}
+      <section className="max-w-[1200px] mx-auto px-4 md:px-6 py-16 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            {
+              title: "Performance Fabric",
+              desc: "4-way stretch, moisture-wicking, and built to last through the toughest sessions.",
+              icon: (
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg>
+              ),
+            },
+            {
+              title: "Free Shipping",
+              desc: "Fast, tracked delivery on all orders. No minimums, no hidden fees.",
+              icon: (
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1" y="6" width="15" height="12" rx="1" />
+                  <path d="M16 10h4l3 3v5h-7V10z" />
+                  <circle cx="5.5" cy="18.5" r="2.5" />
+                  <circle cx="18.5" cy="18.5" r="2.5" />
+                </svg>
+              ),
+            },
+            {
+              title: "No Compromise",
+              desc: "30-day returns, no questions asked. If it doesn't perform, send it back.",
+              icon: (
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              ),
+            },
+          ].map((f) => (
+            <div key={f.title} className="border border-[#E5E7EB] rounded-[8px] p-6 bg-white">
+              <div className="mb-4">{f.icon}</div>
+              <h3 className="font-[Montserrat] font-bold text-[17px] text-black mb-2">{f.title}</h3>
+              <p className="font-[Roboto] text-[14px] text-[#6B7280] leading-[19.6px]">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-black py-16 md:py-20">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6 text-center">
+          <h2 className="font-[Anton] text-[28px] md:text-[36px] text-white mb-4">
+            GEAR UP. SHOW UP.
+          </h2>
+          <p className="font-[Roboto] text-[16px] text-[#6B7280] mb-8 max-w-[480px] mx-auto leading-[24px]">
+            Two products. Zero excuses. Start building your kit today.
+          </p>
+          <Link
+            href="/products"
+            className="inline-block bg-white text-black font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#E5E7EB] transition-colors"
+          >
+            Browse Collection
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

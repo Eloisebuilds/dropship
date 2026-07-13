@@ -1,108 +1,47 @@
 "use client";
 
-import { supabase } from "@/lib/supabase/client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url: string;
-}
+import { products } from "@/lib/products";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data) {
-        setProducts(data);
-      }
-      setLoading(false);
-    }
-
-    fetchProducts();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black">
-      <div className="max-w-6xl mx-auto px-8 py-16">
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <h1 className="text-4xl font-bold text-black dark:text-zinc-50">
-              Products
-            </h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-              Browse our collection
-            </p>
-          </div>
-          <Link
-            href="/"
-            className="text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-50 transition-colors"
-          >
-            ← Back to Home
-          </Link>
-        </div>
+    <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-12 md:py-16">
+      <div className="mb-10">
+        <h1 className="font-[Montserrat] font-bold text-[28px] md:text-[30px] text-black mb-2">
+          Shop
+        </h1>
+        <p className="font-[Roboto] text-[14px] text-[#6B7280]">
+          {products.length} products
+        </p>
+      </div>
 
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="text-4xl mb-4">⏳</div>
-            <p className="text-zinc-600 dark:text-zinc-400">Loading products...</p>
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-6">📦</div>
-            <h2 className="text-2xl font-semibold text-black dark:text-zinc-50 mb-4">
-              No Products Yet
-            </h2>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Add your first product through the Supabase dashboard to get started.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-lg border border-zinc-200 dark:border-zinc-800 hover:shadow-xl transition-shadow"
-              >
-                {product.image_url && (
-                  <div className="aspect-square bg-zinc-100 dark:bg-zinc-800">
-                    <img
-                      src={product.image_url}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-black dark:text-zinc-50 mb-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4 line-clamp-2">
-                    {product.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-black dark:text-zinc-50">
-                      ${product.price.toFixed(2)}
-                    </span>
-                    <button className="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {products.map((product) => (
+          <Link
+            key={product.id}
+            href={`/products/${product.id}`}
+            className="group border border-[#E5E7EB] rounded-[8px] overflow-hidden bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-shadow"
+          >
+            <div className="aspect-[4/5] bg-[#F3F4F6] overflow-hidden">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="font-[Montserrat] font-bold text-[17px] text-black mb-1">
+                {product.name}
+              </h3>
+              <p className="font-[Roboto] text-[14px] text-[#6B7280] mb-3">
+                {product.category}
+              </p>
+              <p className="font-[Roboto] font-bold text-[16px] text-black">
+                ${product.price.toFixed(2)}
+              </p>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );
