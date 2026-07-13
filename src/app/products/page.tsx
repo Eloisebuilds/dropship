@@ -1,5 +1,8 @@
+"use client";
+
 import { supabase } from "@/lib/supabase/client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface Product {
   id: string;
@@ -9,22 +12,25 @@ interface Product {
   image_url: string;
 }
 
-async function getProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (error) {
-    console.error("Error fetching products:", error);
-    return [];
-  }
+  useEffect(() => {
+    async function fetchProducts() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  return data || [];
-}
+      if (!error && data) {
+        setProducts(data);
+      }
+      setLoading(false);
+    }
 
-export default async function ProductsPage() {
-  const products = await getProducts();
+    fetchProducts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black">
@@ -46,15 +52,19 @@ export default async function ProductsPage() {
           </Link>
         </div>
 
-        {products.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="text-4xl mb-4">⏳</div>
+            <p className="text-zinc-600 dark:text-zinc-400">Loading products...</p>
+          </div>
+        ) : products.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl mb-6">📦</div>
             <h2 className="text-2xl font-semibold text-black dark:text-zinc-50 mb-4">
               No Products Yet
             </h2>
             <p className="text-zinc-600 dark:text-zinc-400">
-              Add your first product through the Supabase dashboard to get
-              started.
+              Add your first product through the Supabase dashboard to get started.
             </p>
           </div>
         ) : (
