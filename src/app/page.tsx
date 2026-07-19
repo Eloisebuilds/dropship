@@ -29,7 +29,7 @@ export default function Home() {
       {/* ── Hero (UNCHANGED) ── */}
       <section className="relative w-full h-[520px] md:h-[640px] bg-black flex items-center justify-center overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1600&q=80"
+          src="/7.png"
           alt="Clean home floor"
           className="absolute inset-0 w-full h-full object-cover opacity-60"
         />
@@ -144,26 +144,37 @@ export default function Home() {
 
       {/* ── Clean Smarter ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
-        <div className="max-w-[1200px] mx-auto px-4 md:px-6 text-center">
-          <p className="font-[Roboto] font-bold text-[12px] text-[#2563EB] mb-3 tracking-wide uppercase">Why FavorItems</p>
-          <h2 className="font-[Montserrat] font-bold text-[28px] md:text-[30px] text-black mb-3">
-            Clean Smarter. Not Harder.
-          </h2>
-          <p className="font-[Roboto] text-[14px] text-[#6B7280] mb-10 max-w-[480px] mx-auto leading-[19.6px]">
-            The 360° Microfiber Floor Mop is engineered to make floor cleaning faster, easier, and more effective.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-[800px] mx-auto">
-            {[
-              { icon: "🔄", label: "360° Flexible Head" },
-              { icon: "💧", label: "Wet & Dry Cleaning" },
-              { icon: "🧹", label: "Ultra-Absorbent Microfiber" },
-              { icon: "📐", label: "Reaches Every Corner" },
-            ].map((b) => (
-              <div key={b.label} className="bg-white border border-[#E5E7EB] rounded-[8px] p-5 flex flex-col items-center gap-3">
-                <span className="text-[28px]">{b.icon}</span>
-                <span className="font-[Roboto] font-bold text-[14px] text-black text-center leading-tight">{b.label}</span>
-              </div>
-            ))}
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
+            <img
+              src="/2.png"
+              alt="360° Microfiber Floor Mop"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <p className="font-[Roboto] font-bold text-[12px] text-[#2563EB] mb-3 tracking-wide uppercase">Why FavorItems</p>
+            <h2 className="font-[Montserrat] font-bold text-[28px] md:text-[30px] text-black mb-3">
+              Clean Smarter. Not Harder.
+            </h2>
+            <p className="font-[Roboto] text-[14px] text-[#6B7280] mb-8 max-w-[480px] leading-[19.6px]">
+              The 360° Microfiber Floor Mop is engineered to make floor cleaning faster, easier, and more effective.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                "360° Flexible Head",
+                "Wet & Dry Cleaning",
+                "Ultra-Absorbent Microfiber",
+                "Reaches Every Corner",
+              ].map((b) => (
+                <div key={b} className="flex items-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  <span className="font-[Roboto] text-[14px] text-black">{b}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -227,7 +238,7 @@ export default function Home() {
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
             <img
-              src="https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=800&q=80"
+              src="/1.png"
               alt="Built-in cleaner tank"
               className="w-full h-full object-cover"
             />
@@ -279,7 +290,7 @@ export default function Home() {
           </div>
           <div className="order-1 md:order-2 aspect-[4/3] bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB]">
             <img
-              src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80"
+              src="/4.png"
               alt="Self-cleaning mop system"
               className="w-full h-full object-cover"
             />
@@ -292,7 +303,7 @@ export default function Home() {
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
             <img
-              src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=800&q=80"
+              src="/3.png"
               alt="Chenille microfiber pad"
               className="w-full h-full object-cover"
             />
@@ -341,7 +352,7 @@ export default function Home() {
           </div>
           <div className="order-1 md:order-2 aspect-[4/3] bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB]">
             <img
-              src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800&q=80"
+              src="/6.png"
               alt="Low profile mop cleaning under furniture"
               className="w-full h-full object-cover"
             />
