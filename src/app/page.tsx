@@ -7,7 +7,6 @@ import { useState } from "react";
 export default function Home() {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
-  const [activeImage, setActiveImage] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const handleAdd = () => {
@@ -29,7 +28,7 @@ export default function Home() {
       {/* ── Hero (UNCHANGED) ── */}
       <section className="relative w-full h-[520px] md:h-[640px] bg-black flex items-center justify-center overflow-hidden">
         <img
-          src="/7.png"
+          src="/8.png"
           alt="Clean home floor"
           className="absolute inset-0 w-full h-full object-cover opacity-60"
         />
@@ -56,27 +55,12 @@ export default function Home() {
       {/* ── Product Buy Box ── */}
       <section id="product-buy" className="max-w-[1200px] mx-auto px-4 md:px-6 py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          <div>
-            <div className="aspect-[4/5] bg-[#F3F4F6] rounded-[8px] overflow-hidden mb-3">
-              <img
-                src={product.gallery[activeImage]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex gap-2">
-              {product.gallery.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveImage(i)}
-                  className={`w-[72px] h-[72px] rounded-[4px] overflow-hidden border-2 transition-colors ${
-                    activeImage === i ? "border-black" : "border-[#E5E7EB] hover:border-[#6B7280]"
-                  }`}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+          <div className="bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
+            <img
+              src="/7.png"
+              alt={product.name}
+              className="w-full h-auto max-h-[600px] object-contain"
+            />
           </div>
 
           <div className="flex flex-col">
@@ -145,11 +129,11 @@ export default function Home() {
       {/* ── Clean Smarter ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
+          <div className="bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
             <img
               src="/2.png"
               alt="360° Microfiber Floor Mop"
-              className="w-full h-full object-cover"
+              className="w-full h-auto max-h-[400px] object-contain"
             />
           </div>
           <div>
@@ -236,11 +220,11 @@ export default function Home() {
       {/* ── Built-In Cleaner Tank ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
+          <div className="bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
             <img
               src="/1.png"
               alt="Built-in cleaner tank"
-              className="w-full h-full object-cover"
+              className="w-full h-auto max-h-[400px] object-contain"
             />
           </div>
           <div>
@@ -288,11 +272,11 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="order-1 md:order-2 aspect-[4/3] bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB]">
+          <div className="order-1 md:order-2 bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
             <img
               src="/4.png"
               alt="Self-cleaning mop system"
-              className="w-full h-full object-cover"
+              className="w-full h-auto max-h-[400px] object-contain"
             />
           </div>
         </div>
@@ -301,11 +285,11 @@ export default function Home() {
       {/* ── Ultra Absorbent Chenille Pad ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
+          <div className="bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
             <img
               src="/3.png"
               alt="Chenille microfiber pad"
-              className="w-full h-full object-cover"
+              className="w-full h-auto max-h-[400px] object-contain"
             />
           </div>
           <div>
@@ -350,11 +334,11 @@ export default function Home() {
               The slim, angled head and 135 cm handle let you reach deep under beds, sofas, cabinets, and other furniture — no bending, no moving heavy items.
             </p>
           </div>
-          <div className="order-1 md:order-2 aspect-[4/3] bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB]">
+          <div className="order-1 md:order-2 bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
             <img
               src="/6.png"
               alt="Low profile mop cleaning under furniture"
-              className="w-full h-full object-cover"
+              className="w-full h-auto max-h-[400px] object-contain"
             />
           </div>
         </div>
