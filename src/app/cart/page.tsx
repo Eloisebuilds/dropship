@@ -1,10 +1,12 @@
 "use client";
 
 import { useCart } from "@/lib/cart";
+import { useCurrency, formatPrice } from "@/lib/currency";
 import Link from "next/link";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total } = useCart();
+  const currency = useCurrency();
 
   if (items.length === 0) {
     return (
@@ -15,7 +17,7 @@ export default function CartPage() {
           Add the 360° Microfiber Floor Mop to get started.
         </p>
         <Link
-          href="/products/mop-001"
+          href="/"
           className="inline-block bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#6B7280] transition-colors"
         >
           View Product
@@ -77,7 +79,7 @@ export default function CartPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="font-[Roboto] font-bold text-[14px] text-black">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.product.price * item.quantity, currency)}
                     </span>
                     <button
                       onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor)}
@@ -98,7 +100,7 @@ export default function CartPage() {
           <div className="flex flex-col gap-3 mb-6">
             <div className="flex justify-between font-[Roboto] text-[14px]">
               <span className="text-[#6B7280]">Subtotal</span>
-              <span className="text-black font-bold">${total.toFixed(2)}</span>
+              <span className="text-black font-bold">{formatPrice(total, currency)}</span>
             </div>
             <div className="flex justify-between font-[Roboto] text-[14px]">
               <span className="text-[#6B7280]">Shipping</span>
@@ -106,14 +108,14 @@ export default function CartPage() {
             </div>
             <div className="border-t border-[#E5E7EB] pt-3 flex justify-between font-[Roboto] text-[16px]">
               <span className="text-black font-bold">Total</span>
-              <span className="text-black font-bold">${total.toFixed(2)}</span>
+              <span className="text-black font-bold">{formatPrice(total, currency)}</span>
             </div>
           </div>
           <button className="w-full h-[48px] bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] hover:bg-[#6B7280] transition-colors">
             Checkout
           </button>
           <Link
-            href="/products"
+            href="/"
             className="block text-center font-[Roboto] text-[14px] text-[#6B7280] hover:text-black transition-colors mt-4"
           >
             Continue Shopping

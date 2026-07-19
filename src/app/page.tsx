@@ -3,11 +3,13 @@
 import { product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useState } from "react";
+import { useCurrency, formatPrice } from "@/lib/currency";
 
 export default function Home() {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const currency = useCurrency();
 
   const handleAdd = () => {
     addItem(product, "One Size", "Standard");
@@ -19,7 +21,7 @@ export default function Home() {
     { q: "Can it be used on hardwood floors?", a: "Yes. The soft microfiber pad is safe on all sealed hardwood floors, as well as tile, laminate, vinyl, and marble." },
     { q: "Can I use my own cleaning solution?", a: "Absolutely. The built-in reservoir lets you fill with any floor-safe cleaning solution of your choice." },
     { q: "Is the microfiber pad machine washable?", a: "Yes. The chenille pad is fully machine washable. We recommend a gentle cycle with cold water for best longevity." },
-    { q: "How often should I replace the pad?", a: "With regular use and proper washing, the pad lasts 3–6 months. Replacement pads are also available." },
+    { q: "How often should I replace the pad?", a: "With regular use and proper washing, the pad lasts 3–6 months." },
     { q: "Can it clean under furniture?", a: "Yes. The low-profile design and 135 cm handle let the mop head slide effortlessly under beds, sofas, and cabinets." },
   ];
 
@@ -32,7 +34,7 @@ export default function Home() {
           alt="Clean home floor"
           className="absolute inset-0 w-full h-full object-cover opacity-60"
         />
-        <div className="absolute inset-0 bg-[#111111CC]" />
+        <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 text-center px-4 max-w-[700px]">
           <p className="font-[Roboto] font-bold text-[12px] text-white/70 mb-4 tracking-wide">
             BEST SELLER
@@ -47,7 +49,7 @@ export default function Home() {
             href="#product-buy"
             className="inline-block bg-white text-black font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#E5E7EB] transition-colors"
           >
-            Shop Now — $39.95
+            Shop Now — {formatPrice(product.price, currency)}
           </a>
         </div>
       </section>
@@ -78,8 +80,8 @@ export default function Home() {
             </p>
 
             <div className="flex items-baseline gap-3 mb-6">
-              <span className="font-[Roboto] font-bold text-[24px] text-black">${product.price.toFixed(2)}</span>
-              <span className="font-[Roboto] text-[16px] text-[#6B7280] line-through">${product.originalPrice.toFixed(2)}</span>
+              <span className="font-[Roboto] font-bold text-[24px] text-black">{formatPrice(product.price, currency)}</span>
+              <span className="font-[Roboto] text-[16px] text-[#6B7280] line-through">{formatPrice(product.originalPrice, currency)}</span>
               <span className="font-[Roboto] font-bold text-[12px] text-[#B91C1C]">
                 Save {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
               </span>
@@ -109,11 +111,11 @@ export default function Home() {
               onClick={handleAdd}
               className="w-full h-[48px] bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] hover:bg-[#6B7280] transition-colors"
             >
-              {added ? "Added to Cart ✓" : "Add to Cart — $39.95"}
+              {added ? "Added to Cart ✓" : `Add to Cart — ${formatPrice(product.price, currency)}`}
             </button>
 
             <div className="flex items-center gap-6 mt-4">
-              {["Free Shipping", "30-Day Returns", "Secure Checkout"].map((t) => (
+              {["Secure Checkout"].map((t) => (
                 <span key={t} className="font-[Roboto] text-[12px] text-[#6B7280] flex items-center gap-1">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6L9 17l-5-5" />
@@ -439,7 +441,7 @@ export default function Home() {
             READY TO CLEAN SMARTER?
           </h2>
           <p className="font-[Roboto] text-[16px] text-[#6B7280] mb-8 max-w-[480px] mx-auto leading-[24px]">
-            Join thousands who&apos;ve already made the switch. Free shipping, 30-day returns.
+            Join thousands who&apos;ve already made the switch.
           </p>
           <button
             onClick={() => {
@@ -448,7 +450,7 @@ export default function Home() {
             }}
             className="inline-block bg-white text-black font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#E5E7EB] transition-colors"
           >
-            Add to Cart — $39.95
+            Add to Cart — {formatPrice(product.price, currency)}
           </button>
         </div>
       </section>

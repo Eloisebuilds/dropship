@@ -19,9 +19,6 @@ export default function Header() {
           <Link href="/" className="font-[Roboto] text-[14px] font-normal text-black hover:text-[#6B7280] transition-colors">
             Home
           </Link>
-          <Link href="/products" className="font-[Roboto] text-[14px] font-normal text-black hover:text-[#6B7280] transition-colors">
-            Shop
-          </Link>
         </nav>
 
         <div className="flex items-center gap-4">
@@ -54,9 +51,6 @@ export default function Header() {
         <div className="md:hidden border-t border-[#E5E7EB] bg-white px-4 py-4 flex flex-col gap-4">
           <Link href="/" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
             Home
-          </Link>
-          <Link href="/products" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
-            Shop
           </Link>
         </div>
       )}
