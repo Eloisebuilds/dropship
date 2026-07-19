@@ -25,8 +25,8 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "FavorItems — Performance Gear",
-  description: "Performance gear built for those who push limits.",
+  title: "FavorItems — Clean Smarter",
+  description: "The 360° Microfiber Floor Mop. Wet & dry cleaning, self-cleaning system, and a built-in tank.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -8,7 +8,7 @@ export default function Footer() {
           <div className="md:col-span-2">
             <p className="font-[Montserrat] font-bold text-[20px] mb-4">FAVORITEMS</p>
             <p className="font-[Roboto] text-[14px] text-[#6B7280] max-w-[320px] leading-[19.6px]">
-              Performance gear built for those who push limits. No compromises.
+              Clean smarter with FavorItems. Performance cleaning tools built to last. No compromises.
             </p>
           </div>
 
@@ -16,13 +16,13 @@ export default function Footer() {
             <p className="font-[Roboto] font-bold text-[14px] mb-4">Shop</p>
             <div className="flex flex-col gap-2">
               <Link href="/products" className="font-[Roboto] text-[14px] text-[#6B7280] hover:text-white transition-colors">
-                All Products
+                Mop
               </Link>
               <Link href="/products" className="font-[Roboto] text-[14px] text-[#6B7280] hover:text-white transition-colors">
-                Tops
+                Replacement Pads
               </Link>
               <Link href="/products" className="font-[Roboto] text-[14px] text-[#6B7280] hover:text-white transition-colors">
-                Bottoms
+                Accessories
               </Link>
             </div>
           </div>

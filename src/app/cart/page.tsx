@@ -12,13 +12,13 @@ export default function CartPage() {
         <div className="text-[48px] mb-6">🛒</div>
         <h1 className="font-[Montserrat] font-bold text-[24px] text-black mb-3">Your cart is empty</h1>
         <p className="font-[Roboto] text-[14px] text-[#6B7280] mb-8">
-          Add some gear to get started.
+          Add the 360° Microfiber Floor Mop to get started.
         </p>
         <Link
-          href="/products"
+          href="/products/mop-001"
           className="inline-block bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#6B7280] transition-colors"
         >
-          Browse Shop
+          View Product
         </Link>
       </div>
     );
