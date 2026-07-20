@@ -39,11 +39,11 @@ export default function CartPage() {
               key={`${item.product.id}-${item.selectedSize}-${item.selectedColor}`}
               className="flex gap-4 border border-[#E5E7EB] rounded-[8px] p-4 bg-white"
             >
-              <div className="w-[100px] h-[100px] bg-[#F3F4F6] rounded-[4px] overflow-hidden shrink-0 flex items-center justify-center p-2">
+              <div className="w-[160px] bg-[#F3F4F6] rounded-[4px] overflow-hidden shrink-0 flex items-center justify-center">
                 <img
                   src={item.product.image}
                   alt={item.product.name}
-                  className="w-full h-full object-contain"
+                  className="w-full h-auto object-contain"
                 />
               </div>
               <div className="flex-1 flex flex-col justify-between">
