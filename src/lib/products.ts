@@ -19,12 +19,8 @@ export const product: Product = {
     "The 360° Microfiber Floor Mop combines a flexible rotating head, built-in cleaner tank, and self-cleaning wringing system into one lightweight tool. Designed for every floor type — hardwood, tile, laminate, and more.",
   price: 15.00,
   originalPrice: 29.95,
-  image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80",
-  gallery: [
-    "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80",
-    "https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=800&q=80",
-    "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80",
-  ],
+  image: "/7.png",
+  gallery: ["/7.png"],
   category: "Home Cleaning",
   badge: "Best Seller",
 };

@@ -6,7 +6,7 @@ export default function Footer() {
           <div>
             <p className="font-[Montserrat] font-bold text-[20px] mb-4">FAVORITEMS</p>
             <p className="font-[Roboto] text-[14px] text-[#6B7280] max-w-[320px] leading-[19.6px]">
-              Clean smarter with FavorItems. Performance cleaning tools built to last. No compromises.
+              Your favorite home items.
             </p>
           </div>
         </div>

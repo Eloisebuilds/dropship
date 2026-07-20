@@ -27,7 +27,7 @@ export default function Home() {
 
   return (
     <div>
-      {/* ── Hero (UNCHANGED) ── */}
+      {/* ── Hero ── */}
       <section className="relative w-full h-[520px] md:h-[640px] bg-black flex items-center justify-center overflow-hidden">
         <img
           src="/8.png"
@@ -56,12 +56,12 @@ export default function Home() {
 
       {/* ── Product Buy Box ── */}
       <section id="product-buy" className="max-w-[1200px] mx-auto px-4 md:px-6 py-8 md:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          <div className="bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="flex items-center justify-center">
             <img
               src="/7.png"
               alt={product.name}
-              className="w-full h-auto max-h-[600px] object-contain"
+              className="w-full h-auto max-w-[500px] object-contain"
             />
           </div>
 
@@ -131,11 +131,11 @@ export default function Home() {
       {/* ── Clean Smarter ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
+          <div className="flex items-center justify-center">
             <img
               src="/2.png"
               alt="360° Microfiber Floor Mop"
-              className="w-full h-auto max-h-[400px] object-contain"
+              className="w-full h-auto max-w-[420px] object-contain"
             />
           </div>
           <div>
@@ -222,11 +222,11 @@ export default function Home() {
       {/* ── Built-In Cleaner Tank ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
+          <div className="flex items-center justify-center">
             <img
               src="/1.png"
               alt="Built-in cleaner tank"
-              className="w-full h-auto max-h-[400px] object-contain"
+              className="w-full h-auto max-w-[420px] object-contain"
             />
           </div>
           <div>
@@ -274,11 +274,11 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="order-1 md:order-2 bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
+          <div className="order-1 md:order-2 flex items-center justify-center">
             <img
               src="/4.png"
               alt="Self-cleaning mop system"
-              className="w-full h-auto max-h-[400px] object-contain"
+              className="w-full h-auto max-w-[420px] object-contain"
             />
           </div>
         </div>
@@ -287,11 +287,11 @@ export default function Home() {
       {/* ── Ultra Absorbent Chenille Pad ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
+          <div className="flex items-center justify-center">
             <img
               src="/3.png"
               alt="Chenille microfiber pad"
-              className="w-full h-auto max-h-[400px] object-contain"
+              className="w-full h-auto max-w-[420px] object-contain"
             />
           </div>
           <div>
@@ -336,11 +336,11 @@ export default function Home() {
               The slim, angled head and 135 cm handle let you reach deep under beds, sofas, cabinets, and other furniture — no bending, no moving heavy items.
             </p>
           </div>
-          <div className="order-1 md:order-2 bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB] flex items-center justify-center p-4">
+          <div className="order-1 md:order-2 flex items-center justify-center">
             <img
               src="/6.png"
               alt="Low profile mop cleaning under furniture"
-              className="w-full h-auto max-h-[400px] object-contain"
+              className="w-full h-auto max-w-[340px] object-contain"
             />
           </div>
         </div>
