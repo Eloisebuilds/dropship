@@ -1,10 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { product } from "@/lib/products";
+import { product as hardcodedProduct } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { useCurrency, formatPrice } from "@/lib/currency";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -12,13 +13,36 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const currency = useCurrency();
+  const [product, setProduct] = useState(hardcodedProduct);
+  const [loading, setLoading] = useState(true);
 
-  if (product.id !== params.id) {
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { fetchProductById } = await import("@/lib/products");
+        const dbProduct = await fetchProductById(params.id as string);
+        if (dbProduct) setProduct(dbProduct);
+      } catch {}
+      setLoading(false);
+    };
+    load();
+  }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-20 text-center">
+        <p className="font-[Roboto] text-[14px] text-[#6B7280]">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!product) {
     return (
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-20 text-center">
         <h1 className="font-[Montserrat] font-bold text-[24px] text-black mb-4">Product not found</h1>
-        <Link href="/products" className="font-[Roboto] text-[14px] font-bold text-black underline">
-          Back to shop
+        <Link href="/" className="font-[Roboto] text-[14px] font-bold text-black underline">
+          Back to home
         </Link>
       </div>
     );
@@ -34,32 +58,30 @@ export default function ProductDetailPage() {
     { q: "Can it be used on hardwood floors?", a: "Yes. The soft microfiber pad is safe on all sealed hardwood floors, as well as tile, laminate, vinyl, and marble." },
     { q: "Can I use my own cleaning solution?", a: "Absolutely. The built-in reservoir lets you fill with any floor-safe cleaning solution of your choice." },
     { q: "Is the microfiber pad machine washable?", a: "Yes. The chenille pad is fully machine washable. We recommend a gentle cycle with cold water for best longevity." },
-    { q: "How often should I replace the pad?", a: "With regular use and proper washing, the pad lasts 3–6 months. Replacement pads are also available." },
+    { q: "How often should I replace the pad?", a: "With regular use and proper washing, the pad lasts 3–6 months." },
     { q: "Can it clean under furniture?", a: "Yes. The low-profile design and 135 cm handle let the mop head slide effortlessly under beds, sofas, and cabinets." },
   ];
 
   return (
     <div>
-      {/* ── HERO: Product + Buy Box ── */}
       <section className="max-w-[1200px] mx-auto px-4 md:px-6 py-8 md:py-12">
         <Link
-          href="/products"
+          href="/"
           className="inline-flex items-center gap-1 font-[Roboto] text-[14px] text-[#6B7280] hover:text-black transition-colors mb-6"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          Back to shop
+          Back to home
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          {/* Image */}
           <div>
             <div className="aspect-[4/5] bg-[#F3F4F6] rounded-[8px] overflow-hidden mb-3">
               <img
                 src={product.gallery[activeImage]}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
             <div className="flex gap-2">
@@ -71,13 +93,12 @@ export default function ProductDetailPage() {
                     activeImage === i ? "border-black" : "border-[#E5E7EB] hover:border-[#6B7280]"
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img src={img} alt="" className="w-full h-full object-contain" />
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Buy Box */}
           <div className="flex flex-col">
             {product.badge && (
               <span className="self-start font-[Roboto] font-bold text-[12px] text-white bg-black rounded-[4px] px-3 py-1 mb-4">
@@ -93,8 +114,8 @@ export default function ProductDetailPage() {
             </p>
 
             <div className="flex items-baseline gap-3 mb-6">
-              <span className="font-[Roboto] font-bold text-[24px] text-black">${product.price.toFixed(2)}</span>
-              <span className="font-[Roboto] text-[16px] text-[#6B7280] line-through">${product.originalPrice.toFixed(2)}</span>
+              <span className="font-[Roboto] font-bold text-[24px] text-black">{formatPrice(product.price, currency)}</span>
+              <span className="font-[Roboto] text-[16px] text-[#6B7280] line-through">{formatPrice(product.originalPrice, currency)}</span>
               <span className="font-[Roboto] font-bold text-[12px] text-[#B91C1C]">
                 Save {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
               </span>
@@ -104,7 +125,6 @@ export default function ProductDetailPage() {
               {product.description}
             </p>
 
-            {/* Quick Benefits */}
             <div className="grid grid-cols-2 gap-2 mb-8">
               {[
                 "360° Flexible Head",
@@ -125,11 +145,11 @@ export default function ProductDetailPage() {
               onClick={handleAdd}
               className="w-full h-[48px] bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] hover:bg-[#6B7280] transition-colors"
             >
-              {added ? "Added to Cart ✓" : "Add to Cart — $39.95"}
+              {added ? "Added to Cart ✓" : `Add to Cart — ${formatPrice(product.price, currency)}`}
             </button>
 
             <div className="flex items-center gap-6 mt-4">
-              {["Free Shipping", "30-Day Returns", "Secure Checkout"].map((t) => (
+              {["Secure Checkout"].map((t) => (
                 <span key={t} className="font-[Roboto] text-[12px] text-[#6B7280] flex items-center gap-1">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6L9 17l-5-5" />
@@ -142,7 +162,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 1: Clean Smarter ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 text-center">
           <p className="font-[Roboto] font-bold text-[12px] text-[#2563EB] mb-3 tracking-wide uppercase">Why FavorItems</p>
@@ -168,7 +187,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 2: One Mop. Every Mess. ── */}
       <section className="py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6">
           <div className="text-center mb-10">
@@ -181,7 +199,6 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[800px] mx-auto">
-            {/* Dry */}
             <div className="border border-[#E5E7EB] rounded-[8px] p-6 bg-white">
               <p className="font-[Roboto] font-bold text-[12px] text-[#2563EB] mb-4 uppercase tracking-wide">Dry Cleaning</p>
               <div className="flex flex-col gap-4">
@@ -201,7 +218,6 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Wet */}
             <div className="border border-[#E5E7EB] rounded-[8px] p-6 bg-white">
               <p className="font-[Roboto] font-bold text-[12px] text-[#2563EB] mb-4 uppercase tracking-wide">Wet Cleaning</p>
               <div className="flex flex-col gap-4">
@@ -224,7 +240,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 3: Built-In Cleaner Tank ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
@@ -249,7 +264,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 4: Self-Cleaning System ── */}
       <section className="py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="order-2 md:order-1">
@@ -289,7 +303,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 5: Ultra Absorbent Chenille Pad ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
@@ -326,7 +339,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 6: Low Profile Design ── */}
       <section className="py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="order-2 md:order-1">
@@ -351,7 +363,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 7: Specifications ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[600px] mx-auto px-4 md:px-6">
           <h2 className="font-[Montserrat] font-bold text-[28px] md:text-[30px] text-black mb-8 text-center">
@@ -378,7 +389,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 8: What's Included ── */}
       <section className="py-16 md:py-20">
         <div className="max-w-[600px] mx-auto px-4 md:px-6">
           <h2 className="font-[Montserrat] font-bold text-[28px] md:text-[30px] text-black mb-8 text-center">
@@ -400,7 +410,6 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── SECTION 9: FAQ ── */}
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[700px] mx-auto px-4 md:px-6">
           <h2 className="font-[Montserrat] font-bold text-[28px] md:text-[30px] text-black mb-8 text-center">
@@ -439,14 +448,13 @@ export default function ProductDetailPage() {
         </div>
       </section>
 
-      {/* ── Final CTA ── */}
       <section className="bg-black py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 text-center">
           <h2 className="font-[Anton] text-[28px] md:text-[36px] text-white mb-4">
             READY TO CLEAN SMARTER?
           </h2>
           <p className="font-[Roboto] text-[16px] text-[#6B7280] mb-8 max-w-[480px] mx-auto leading-[24px]">
-            Join thousands who&apos;ve already made the switch. Free shipping, 30-day returns.
+            Join thousands who&apos;ve already made the switch.
           </p>
           <button
             onClick={() => {
@@ -455,7 +463,7 @@ export default function ProductDetailPage() {
             }}
             className="inline-block bg-white text-black font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#E5E7EB] transition-colors"
           >
-            Add to Cart — $39.95
+            Add to Cart — {formatPrice(product.price, currency)}
           </button>
         </div>
       </section>
