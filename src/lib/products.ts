@@ -34,6 +34,17 @@ export const products: Product[] = [hardcodedProduct];
 
 let cachedProducts: Product[] | null = null;
 
+interface SupabaseProduct {
+  id: string;
+  name: string;
+  description?: string;
+  price?: string | number;
+  image_url?: string;
+  cj_product_id?: string;
+  cj_variant_id?: string;
+  stock_quantity?: number;
+}
+
 export async function fetchProducts(): Promise<Product[]> {
   if (cachedProducts) return cachedProducts;
 
@@ -48,13 +59,13 @@ export async function fetchProducts(): Promise<Product[]> {
     const data = await res.json();
 
     if (data.products && data.products.length > 0) {
-      const mapped = data.products.map((p: any) => ({
+      const mapped = data.products.map((p: SupabaseProduct) => ({
         id: p.id,
         name: p.name,
         tagline: "Clean Smarter. Not Harder.",
         description: p.description || hardcodedProduct.description,
-        price: parseFloat(p.price) || hardcodedProduct.price,
-        originalPrice: parseFloat(p.price) * 2 || hardcodedProduct.originalPrice,
+        price: parseFloat(String(p.price ?? "")) || hardcodedProduct.price,
+        originalPrice: parseFloat(String(p.price ?? "")) * 2 || hardcodedProduct.originalPrice,
         image: p.image_url || hardcodedProduct.image,
         gallery: [p.image_url || hardcodedProduct.image],
         category: "Home Cleaning",

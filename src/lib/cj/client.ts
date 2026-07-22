@@ -24,7 +24,7 @@ export class CJClient {
   private async request<T>(
     method: string,
     path: string,
-    body?: Record<string, any>,
+    body?: Record<string, unknown>,
     isAuth: boolean = false
   ): Promise<T> {
     await this.ensureToken();
@@ -118,19 +118,19 @@ export class CJClient {
 
   async getProductDetails(pid: string): Promise<CJProductDetail> {
     const params = new URLSearchParams({ pid });
-    const res = await this.request<any>("GET", `/product/getDetails?${params}`);
+    const res = await this.request<{ code: number; result: boolean; data: CJProductDetail }>("GET", `/product/getDetails?${params}`);
     return res.data;
   }
 
   async getVariants(pid: string): Promise<CJVariant[]> {
     const params = new URLSearchParams({ pid });
-    const res = await this.request<any>("GET", `/product/variant/list?${params}`);
+    const res = await this.request<{ code: number; result: boolean; data: CJVariant[] }>("GET", `/product/variant/list?${params}`);
     return res.data || [];
   }
 
   async getInventory(pid: string): Promise<Record<string, CJInventoryItem[]>> {
     const params = new URLSearchParams({ pid });
-    const res = await this.request<any>("GET", `/product/stock/getInventoryByPid?${params}`);
+    const res = await this.request<{ code: number; result: boolean; data: Record<string, CJInventoryItem[]> }>("GET", `/product/stock/getInventoryByPid?${params}`);
     return res.data || {};
   }
 
@@ -162,19 +162,19 @@ export class CJClient {
   }
 
   async addCart(orderData: { orderNumber: string; orderId: string }) {
-    return this.request<any>("POST", "/shopping/order/addCart", orderData);
+    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/addCart", orderData);
   }
 
   async confirmCart(orderData: { orderNumber: string; orderId: string }) {
-    return this.request<any>("POST", "/shopping/order/addCartConfirm", orderData);
+    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/addCartConfirm", orderData);
   }
 
   async generateParentOrder(orderData: { orderNumber: string; orderId: string }) {
-    return this.request<any>("POST", "/shopping/order/saveGenerateParentOrder", orderData);
+    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/saveGenerateParentOrder", orderData);
   }
 
   async payBalance(orderData: { orderId: string; payType: number }) {
-    return this.request<any>("POST", "/pay/payBalanceV2", {
+    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/pay/payBalanceV2", {
       ...orderData,
       payPassword: "",
       payType: orderData.payType || 1,
@@ -183,7 +183,7 @@ export class CJClient {
 
   async getOrderDetail(orderId: string) {
     const params = new URLSearchParams({ orderId });
-    return this.request<any>("GET", `/shopping/order/getOrderDetail?${params}`);
+    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("GET", `/shopping/order/getOrderDetail?${params}`);
   }
 
   getOpenId(): number | null {

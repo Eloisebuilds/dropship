@@ -72,8 +72,8 @@ export default function CartPage() {
         clearCart();
         setCheckoutSuccess(true);
       }
-    } catch (error: any) {
-      setCheckoutError(error.message || "Checkout failed. Please try again.");
+    } catch (error: unknown) {
+      setCheckoutError(error instanceof Error ? error.message : "Checkout failed. Please try again.");
     } finally {
       setCheckingOut(false);
     }

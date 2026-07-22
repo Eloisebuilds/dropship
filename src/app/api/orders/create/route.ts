@@ -1,10 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCJClient } from "@/lib/cj/client";
 import { createServiceClient } from "@/lib/supabase/server";
+import type { CJOrderCreateResponse } from "@/lib/cj/types";
+
+interface OrderItemInput {
+  product?: {
+    id?: string;
+    price?: number;
+    cjVariantId?: string;
+  };
+  quantity: number;
+}
+
+interface OrderBody {
+  items: OrderItemInput[];
+  customer: { email: string; name: string; phone?: string };
+  shipping?: {
+    address?: string;
+    city?: string;
+    province?: string;
+    country?: string;
+    countryCode?: string;
+    zip?: string;
+    phone?: string;
+  };
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: OrderBody = await request.json();
     const { items, customer, shipping } = body;
 
     if (!items?.length || !customer?.email || !customer?.name) {
@@ -24,7 +48,7 @@ export async function POST(request: NextRequest) {
         shipping_address: shipping?.address || "N/A",
         status: "pending",
         total: items.reduce(
-          (sum: number, item: any) => sum + (item.product?.price || 0) * item.quantity,
+          (sum: number, item: OrderItemInput) => sum + (item.product?.price || 0) * item.quantity,
           0
         ),
       })
@@ -51,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cj = getCJClient();
-    let cjResult: any = null;
+    let cjResult: CJOrderCreateResponse | null = null;
 
     if (cj) {
       try {
@@ -69,7 +93,7 @@ export async function POST(request: NextRequest) {
           logisticName: "CJPacket Ordinary",
           fromCountryCode: "CN",
           isSandbox: process.env.NODE_ENV === "development" ? 1 : 0,
-          products: items.map((item: any) => ({
+          products: items.map((item: OrderItemInput) => ({
             vid: item.product?.cjVariantId || item.product?.id || "",
             quantity: item.quantity,
             storeLineItemId: `${order.id}-${item.product?.id}`,
@@ -86,7 +110,6 @@ export async function POST(request: NextRequest) {
             })
             .eq("id", order.id);
 
-          // Add to CJ cart and proceed
           try {
             await cj.addCart({
               orderNumber: order.id,
@@ -109,17 +132,19 @@ export async function POST(request: NextRequest) {
                 redirectUrl: parentOrder.data.cjPayUrl,
               });
             }
-          } catch (cjFlowError: any) {
-            console.warn("CJ order flow warning (non-fatal):", cjFlowError.message);
+          } catch (cjFlowError: unknown) {
+            const flowMessage = cjFlowError instanceof Error ? cjFlowError.message : "CJ flow failed";
+            console.warn("CJ order flow warning (non-fatal):", flowMessage);
           }
         }
-      } catch (cjError: any) {
-        console.warn("CJ order creation warning (non-fatal):", cjError.message);
+      } catch (cjError: unknown) {
+        const cjMessage = cjError instanceof Error ? cjError.message : "CJ error";
+        console.warn("CJ order creation warning (non-fatal):", cjMessage);
         await supabase
           .from("orders")
           .update({
             status: "pending",
-            error_message: `CJ: ${cjError.message}`,
+            error_message: `CJ: ${cjMessage}`,
           })
           .eq("id", order.id);
       }
@@ -133,10 +158,11 @@ export async function POST(request: NextRequest) {
         ? "Order created and sent to supplier"
         : "Order saved locally. CJ API key not configured.",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Order creation error:", error);
+    const message = error instanceof Error ? error.message : "Failed to create order";
     return NextResponse.json(
-      { error: error.message || "Failed to create order" },
+      { error: message },
       { status: 500 }
     );
   }

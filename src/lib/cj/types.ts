@@ -34,7 +34,7 @@ export interface CJProductListResponse {
   data: {
     content: {
       productList: CJProductListItem[];
-      relatedCategoryList: any[];
+      relatedCategoryList: object[];
       keyWord: string;
     }[];
     pageSize: number;
@@ -112,7 +112,7 @@ export interface CJWebhookPayload {
   messageId: string;
   type: "PRODUCT" | "VARIANT" | "STOCK" | "ORDER" | "LOGISTIC" | "MAKEUP" | "PRIVATE_ORDER" | "ORDERSPLIT" | "SOURCINGCREATE";
   messageType: "INSERT" | "UPDATE" | "DELETE";
-  params: any;
+  params: Record<string, unknown>;
 }
 
 export interface SyncedProduct {

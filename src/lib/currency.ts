@@ -123,8 +123,33 @@ const CURRENCY_MAP: Record<string, { symbol: string; rate: number }> = {
   MRU: { symbol: "UM", rate: 42.5 },
 };
 
-const BASE_PRICE_EUR = 15.0;
-const BASE_ORIGINAL_EUR = 29.95;
+const COUNTRY_CURRENCY: Record<string, string> = {
+  US: "USD", GB: "GBP", CA: "CAD", AU: "AUD", JP: "JPY",
+  CH: "CHF", SE: "SEK", NO: "NOK", DK: "DKK", PL: "PLN",
+  CZ: "CZK", HU: "HUF", RO: "RON", BG: "BGN", HR: "HRK",
+  TR: "TRY", BR: "BRL", MX: "MXN", AR: "ARS", IN: "INR",
+  CN: "CNY", KR: "KRW", SG: "SGD", HK: "HKD", NZ: "NZD",
+  ZA: "ZAR", NG: "NGN", EG: "EGP", AE: "AED", SA: "SAR",
+  QA: "QAR", KW: "KWD", MY: "MYR", TH: "THB", PH: "PHP",
+  ID: "IDR", VN: "VND", RU: "RUB", UA: "UAH", IL: "ILS",
+  KE: "KES", GH: "GHS", TZ: "TZS", MA: "MAD", DZ: "DZD",
+  CO: "COP", PE: "PEN", CL: "CLP", PK: "PKR", BD: "BDT",
+  LK: "LKR", NP: "NPR", MM: "MMK", KZ: "KZT", UZ: "UZS",
+  GE: "GEL", AZ: "AZN", AM: "AMD", MN: "MNT", IS: "ISK",
+  JM: "JMD", TT: "TTD", BB: "BBD", GT: "GTQ", HN: "HNL",
+  NI: "NIO", PA: "PAB", UY: "UYU", PY: "PYG", BO: "BOB",
+  VE: "VES", FJ: "FJD", PG: "PGK", WS: "WST", TO: "TOP",
+  BN: "BND", KH: "KHR", LA: "LAK", MV: "MVR", MU: "MUR",
+  IQ: "IQD", IR: "IRR", JO: "JOD", LB: "LBP", YE: "YER",
+  SY: "SYP", TN: "TND", LY: "LYD", SD: "SDG", ET: "ETB",
+  RW: "RWF", UG: "UGX", CD: "CDF", ZW: "ZWL", ZM: "ZMW",
+  MZ: "MZN", NA: "NAD", BW: "BWP", LS: "LSL", SZ: "SZL",
+  BI: "BIF", AO: "AOA", CI: "XOF", SN: "XOF", ML: "XOF",
+  NE: "XOF", TD: "XAF", CF: "XAF", GQ: "XAF", GA: "XAF",
+  CG: "XAF", BJ: "XOF", TG: "XOF", BF: "XOF", GN: "GNF",
+  SL: "SLL", LR: "LRD", GW: "XOF", CV: "CVE", ST: "STN",
+  AF: "AFN", MD: "MDL", BY: "BYN",
+};
 
 function getCountryFromTimezone(): string | null {
   try {
@@ -306,46 +331,19 @@ function getCountryFromTimezone(): string | null {
   }
 }
 
+function getInitialCurrency(): string {
+  const country = getCountryFromTimezone();
+  if (country) {
+    const cur = COUNTRY_CURRENCY[country];
+    if (cur && CURRENCY_MAP[cur]) return cur;
+  }
+  return "EUR";
+}
+
 export function useCurrency() {
-  const [currency, setCurrency] = useState<string>("EUR");
+  const [currency, setCurrency] = useState<string>(getInitialCurrency);
 
   useEffect(() => {
-    const COUNTRY_CURRENCY: Record<string, string> = {
-      US: "USD", GB: "GBP", CA: "CAD", AU: "AUD", JP: "JPY",
-      CH: "CHF", SE: "SEK", NO: "NOK", DK: "DKK", PL: "PLN",
-      CZ: "CZK", HU: "HUF", RO: "RON", BG: "BGN", HR: "HRK",
-      TR: "TRY", BR: "BRL", MX: "MXN", AR: "ARS", IN: "INR",
-      CN: "CNY", KR: "KRW", SG: "SGD", HK: "HKD", NZ: "NZD",
-      ZA: "ZAR", NG: "NGN", EG: "EGP", AE: "AED", SA: "SAR",
-      QA: "QAR", KW: "KWD", MY: "MYR", TH: "THB", PH: "PHP",
-      ID: "IDR", VN: "VND", RU: "RUB", UA: "UAH", IL: "ILS",
-      KE: "KES", GH: "GHS", TZ: "TZS", MA: "MAD", DZ: "DZD",
-      CO: "COP", PE: "PEN", CL: "CLP", PK: "PKR", BD: "BDT",
-      LK: "LKR", NP: "NPR", MM: "MMK", KZ: "KZT", UZ: "UZS",
-      GE: "GEL", AZ: "AZN", AM: "AMD", MN: "MNT", IS: "ISK",
-      JM: "JMD", TT: "TTD", BB: "BBD", GT: "GT", HN: "HN",
-      NI: "NI", PA: "PA", UY: "UY", PY: "PY", BO: "BO",
-      VE: "VE", FJ: "FJD", PG: "PGK", WS: "WS", TO: "TO",
-      BN: "BND", KH: "KH", LA: "LA", MV: "MV", MU: "MU",
-      IQ: "IQ", IR: "IR", JO: "JO", LB: "LB", YE: "YE",
-      SY: "SY", TN: "TN", LY: "LY", SD: "SD", ET: "ET",
-      RW: "RW", UG: "UG", CD: "CD", ZW: "ZW", ZM: "ZM",
-      MZ: "MZ", NA: "NA", BW: "BW", LS: "LS", SZ: "SZ",
-      BI: "BI", AO: "AO", CI: "CI", SN: "SN", ML: "ML",
-      NE: "NE", TD: "TD", CF: "CF", GQ: "GQ", GA: "GA",
-      CG: "CG", BJ: "BJ", TG: "TG", BF: "BF", GN: "GN",
-      SL: "SL", LR: "LR", GW: "GW", CV: "CV", ST: "ST",
-      AF: "AF", MD: "MD", BY: "BY",
-    };
-
-    const country = getCountryFromTimezone();
-    if (country) {
-      const cur = COUNTRY_CURRENCY[country];
-      if (cur && CURRENCY_MAP[cur]) {
-        setCurrency(cur);
-      }
-    }
-
     fetch("https://ipapi.co/json/")
       .then((r) => r.json())
       .then((data) => {

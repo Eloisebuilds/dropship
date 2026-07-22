@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 function verifySignature(sign: string, rawBody: string, openId: string): boolean {
   try {
@@ -13,17 +14,25 @@ function verifySignature(sign: string, rawBody: string, openId: string): boolean
   }
 }
 
-async function handleProductUpdate(params: any, supabase: any) {
+interface WarehouseInfo {
+  vid: string;
+  areaId: string;
+  areaEn: string;
+  countryCode: string;
+  storageNum: number;
+}
+
+async function handleProductUpdate(params: Record<string, unknown>, supabase: SupabaseClient) {
   await supabase.from("products").update({
     cj_last_synced_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  }).eq("cj_product_id", params.pid);
+  }).eq("cj_product_id", params.pid as string);
 }
 
-async function handleStockUpdate(params: Record<string, any[]>, supabase: any) {
+async function handleStockUpdate(params: Record<string, WarehouseInfo[]>, supabase: SupabaseClient) {
   for (const [vid, warehouses] of Object.entries(params)) {
     const totalStock = warehouses.reduce(
-      (sum: number, w: any) => sum + (w.storageNum || 0),
+      (sum: number, w: WarehouseInfo) => sum + (w.storageNum || 0),
       0
     );
 
@@ -39,10 +48,10 @@ async function handleStockUpdate(params: Record<string, any[]>, supabase: any) {
   }
 }
 
-async function handleOrderUpdate(params: any, supabase: any) {
-  const { orderNumber, cjOrderId, orderStatus, trackNumber, logisticName } = params;
+async function handleOrderUpdate(params: Record<string, unknown>, supabase: SupabaseClient) {
+  const { orderNumber, cjOrderId, orderStatus, trackNumber, logisticName } = params as Record<string, string | undefined>;
 
-  const updateData: Record<string, any> = {
+  const updateData: Record<string, string | undefined> = {
     cj_order_status: orderStatus,
     updated_at: new Date().toISOString(),
   };
@@ -50,7 +59,7 @@ async function handleOrderUpdate(params: any, supabase: any) {
   if (trackNumber) updateData.cj_tracking_number = trackNumber;
   if (logisticName) updateData.cj_logistic_name = logisticName;
 
-  if (["SHIPPED", "DELIVERED", "CANCELLED"].includes(orderStatus)) {
+  if (orderStatus && ["SHIPPED", "DELIVERED", "CANCELLED"].includes(orderStatus)) {
     const statusMap: Record<string, string> = {
       SHIPPED: "shipped",
       DELIVERED: "delivered",
@@ -60,21 +69,21 @@ async function handleOrderUpdate(params: any, supabase: any) {
   }
 
   const filter = cjOrderId
-    ? { column: "cj_order_id", value: cjOrderId }
-    : { column: "id", value: orderNumber };
+    ? { column: "cj_order_id" as const, value: cjOrderId }
+    : { column: "id" as const, value: orderNumber as string };
   await supabase.from("orders").update(updateData).eq(filter.column, filter.value);
 }
 
-async function handleLogisticUpdate(params: any, supabase: any) {
-  const { orderNumber, orderId, trackingNumber, trackingStatus, logisticName } = params;
+async function handleLogisticUpdate(params: Record<string, unknown>, supabase: SupabaseClient) {
+  const { orderNumber, orderId, trackingNumber, trackingStatus, logisticName } = params as Record<string, string | undefined>;
 
   const filter = orderId
-    ? { column: "cj_order_id", value: orderId }
-    : { column: "id", value: orderNumber };
+    ? { column: "cj_order_id" as const, value: orderId }
+    : { column: "id" as const, value: orderNumber as string };
   await supabase.from("orders").update({
     cj_tracking_number: trackingNumber,
     cj_logistic_name: logisticName,
-    cj_order_status: `TRACKING_${trackingStatus}`,
+    cj_order_status: trackingStatus ? `TRACKING_${trackingStatus}` : undefined,
     updated_at: new Date().toISOString(),
   }).eq(filter.column, filter.value);
 }
@@ -140,11 +149,12 @@ export async function POST(request: NextRequest) {
           await handleLogisticUpdate(params, supabase);
           break;
       }
-    } catch (handlerError: any) {
+    } catch (handlerError: unknown) {
       if (eventId) {
+        const message = handlerError instanceof Error ? handlerError.message : "Handler failed";
         await supabase
           .from("webhook_events")
-          .update({ status: "failed", error_message: handlerError.message, processed_at: new Date().toISOString() })
+          .update({ status: "failed", error_message: message, processed_at: new Date().toISOString() })
           .eq("id", eventId);
       }
       throw handlerError;
@@ -158,7 +168,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ code: 200, result: true, message: "ok" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Webhook error:", error);
     return NextResponse.json({ code: 200, result: true, message: "ok" });
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCJClient } from "@/lib/cj/client";
 import { createServiceClient } from "@/lib/supabase/server";
+import type { CJProductListItem, CJVariant, CJInventoryItem } from "@/lib/cj/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,8 +20,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let pid = cj_product_id;
-    let importedProduct: any = null;
+    let pid: string | undefined = cj_product_id;
+    let importedProduct: CJProductListItem | undefined;
 
     if (!pid && keyword) {
       const searchResult = await cj.searchProducts(keyword, 1, 5);
@@ -45,14 +46,14 @@ export async function POST(request: NextRequest) {
       cj.getInventory(pid),
     ]);
 
-    const defaultVariant = variants.find((v: any) => v.variantStatus === 1) || variants[0];
+    const defaultVariant = variants.find((v: CJVariant) => v.variantStatus === 1) || variants[0];
     if (!defaultVariant) {
       return NextResponse.json({ error: "No active variant found" }, { status: 404 });
     }
 
     const totalInventory = Object.values(inventory).reduce(
-      (sum: number, warehouses: any) =>
-        sum + warehouses.reduce((s: number, w: any) => s + (w.storageNum || 0), 0),
+      (sum: number, warehouses: CJInventoryItem[]) =>
+        sum + warehouses.reduce((s: number, w: CJInventoryItem) => s + (w.storageNum || 0), 0),
       0
     );
 
@@ -141,10 +142,11 @@ export async function POST(request: NextRequest) {
         cjVariantId: defaultVariant.vid,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("CJ sync error:", error);
+    const message = error instanceof Error ? error.message : "Sync failed";
     return NextResponse.json(
-      { error: error.message || "Sync failed" },
+      { error: message },
       { status: 500 }
     );
   }
