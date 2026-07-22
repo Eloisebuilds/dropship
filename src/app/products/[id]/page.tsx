@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { product as hardcodedProduct } from "@/lib/products";
 import { useCart } from "@/lib/cart";
@@ -69,11 +70,13 @@ export default function ProductDetailPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           <div>
-            <div className="aspect-[4/5] bg-[#F3F4F6] rounded-[8px] overflow-hidden mb-3">
-              <img
+            <div className="aspect-[4/5] bg-[#F3F4F6] rounded-[8px] overflow-hidden mb-3 relative">
+              <Image
                 src={product.gallery[activeImage]}
                 alt={product.name}
-                className="w-full h-full object-contain"
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
             <div className="flex gap-2">
@@ -81,11 +84,11 @@ export default function ProductDetailPage() {
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  className={`w-[72px] h-[72px] rounded-[4px] overflow-hidden border-2 transition-colors ${
+                  className={`w-[72px] h-[72px] rounded-[4px] overflow-hidden border-2 relative transition-colors ${
                     activeImage === i ? "border-black" : "border-[#E5E7EB] hover:border-[#6B7280]"
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-contain" />
+                  <Image src={img} alt="" fill className="object-contain" sizes="72px" />
                 </button>
               ))}
             </div>
@@ -234,11 +237,13 @@ export default function ProductDetailPage() {
 
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
-            <img
+          <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB] relative">
+            <Image
               src="https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=800&q=80"
               alt="Built-in cleaner tank"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
           <div>
@@ -285,11 +290,13 @@ export default function ProductDetailPage() {
               ))}
             </div>
           </div>
-          <div className="order-1 md:order-2 aspect-[4/3] bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB]">
-            <img
+          <div className="order-1 md:order-2 aspect-[4/3] bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB] relative">
+            <Image
               src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80"
               alt="Self-cleaning mop system"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </div>
@@ -297,11 +304,13 @@ export default function ProductDetailPage() {
 
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB]">
-            <img
+          <div className="aspect-[4/3] bg-white rounded-[8px] overflow-hidden border border-[#E5E7EB] relative">
+            <Image
               src="https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=800&q=80"
               alt="Chenille microfiber pad"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
           <div>
@@ -345,11 +354,13 @@ export default function ProductDetailPage() {
               The slim, angled head and 135 cm handle let you reach deep under beds, sofas, cabinets, and other furniture — no bending, no moving heavy items.
             </p>
           </div>
-          <div className="order-1 md:order-2 aspect-[4/3] bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB]">
-            <img
+          <div className="order-1 md:order-2 aspect-[4/3] bg-[#F3F4F6] rounded-[8px] overflow-hidden border border-[#E5E7EB] relative">
+            <Image
               src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800&q=80"
               alt="Low profile mop cleaning under furniture"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </div>

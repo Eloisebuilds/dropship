@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useState } from "react";
@@ -29,10 +30,12 @@ export default function Home() {
     <div>
       {/* ── Hero ── */}
       <section className="relative w-full h-[520px] md:h-[640px] bg-black flex items-center justify-center overflow-hidden">
-        <img
+        <Image
           src="/8.png"
           alt="Clean home floor"
-          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          fill
+          className="object-cover opacity-60"
+          priority
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 text-center px-4 max-w-[700px]">
@@ -58,10 +61,13 @@ export default function Home() {
       <section id="product-buy" className="max-w-[1200px] mx-auto px-4 md:px-6 py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="flex items-center justify-center">
-            <img
+            <Image
               src="/7.png"
               alt={product.name}
+              width={1536}
+              height={1024}
               className="w-full h-auto max-w-[500px] object-contain"
+              priority
             />
           </div>
 
@@ -132,9 +138,11 @@ export default function Home() {
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="flex items-center justify-center">
-            <img
+            <Image
               src="/2.png"
               alt="360° Microfiber Floor Mop"
+              width={1254}
+              height={1254}
               className="w-full h-auto max-w-[420px] object-contain"
             />
           </div>
@@ -223,9 +231,11 @@ export default function Home() {
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="flex items-center justify-center">
-            <img
+            <Image
               src="/1.png"
               alt="Built-in cleaner tank"
+              width={1254}
+              height={1254}
               className="w-full h-auto max-w-[420px] object-contain"
             />
           </div>
@@ -275,9 +285,11 @@ export default function Home() {
             </div>
           </div>
           <div className="order-1 md:order-2 flex items-center justify-center">
-            <img
+            <Image
               src="/4.png"
               alt="Self-cleaning mop system"
+              width={1254}
+              height={1254}
               className="w-full h-auto max-w-[420px] object-contain"
             />
           </div>
@@ -288,9 +300,11 @@ export default function Home() {
       <section className="bg-[#F3F4F6] py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="flex items-center justify-center">
-            <img
+            <Image
               src="/3.png"
               alt="Chenille microfiber pad"
+              width={1254}
+              height={1254}
               className="w-full h-auto max-w-[420px] object-contain"
             />
           </div>
@@ -337,9 +351,11 @@ export default function Home() {
             </p>
           </div>
           <div className="order-1 md:order-2 flex items-center justify-center">
-            <img
+            <Image
               src="/6.png"
               alt="Low profile mop cleaning under furniture"
+              width={1086}
+              height={1448}
               className="w-full h-auto max-w-[340px] object-contain"
             />
           </div>

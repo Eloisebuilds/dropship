@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCart } from "@/lib/cart";
 import { useCurrency, formatPrice } from "@/lib/currency";
 import Link from "next/link";
@@ -128,11 +129,13 @@ export default function CartPage() {
               key={`${item.product.id}-${item.selectedSize}-${item.selectedColor}`}
               className="flex gap-4 border border-[#E5E7EB] rounded-[8px] p-4 bg-white"
             >
-              <div className="w-[160px] bg-[#F3F4F6] rounded-[4px] overflow-hidden shrink-0 flex items-center justify-center">
-                <img
+              <div className="w-[160px] aspect-[3/2] bg-[#F3F4F6] rounded-[4px] overflow-hidden shrink-0 relative">
+                <Image
                   src={item.product.image}
                   alt={item.product.name}
-                  className="w-full h-auto object-contain"
+                  fill
+                  className="object-contain"
+                  sizes="160px"
                 />
               </div>
               <div className="flex-1 flex flex-col justify-between">
