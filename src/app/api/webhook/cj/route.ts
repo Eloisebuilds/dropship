@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendOrderShippedEmail } from "@/lib/resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 function verifySignature(sign: string, rawBody: string, openId: string): boolean {
@@ -71,7 +72,17 @@ async function handleOrderUpdate(params: Record<string, unknown>, supabase: Supa
   const filter = cjOrderId
     ? { column: "cj_order_id" as const, value: cjOrderId }
     : { column: "id" as const, value: orderNumber as string };
-  await supabase.from("orders").update(updateData).eq(filter.column, filter.value);
+  const { data: order } = await supabase.from("orders").update(updateData).eq(filter.column, filter.value).select("customer_email, customer_name, id").single();
+
+  if (order && orderStatus === "SHIPPED") {
+    sendOrderShippedEmail(
+      order.customer_email,
+      order.customer_name,
+      order.id.slice(0, 8),
+      trackNumber || null,
+      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-builds333.vercel.app"}/orders/${order.id}`
+    );
+  }
 }
 
 async function handleLogisticUpdate(params: Record<string, unknown>, supabase: SupabaseClient) {
@@ -80,12 +91,22 @@ async function handleLogisticUpdate(params: Record<string, unknown>, supabase: S
   const filter = orderId
     ? { column: "cj_order_id" as const, value: orderId }
     : { column: "id" as const, value: orderNumber as string };
-  await supabase.from("orders").update({
+  const { data: order } = await supabase.from("orders").update({
     cj_tracking_number: trackingNumber,
     cj_logistic_name: logisticName,
     cj_order_status: trackingStatus ? `TRACKING_${trackingStatus}` : undefined,
     updated_at: new Date().toISOString(),
-  }).eq(filter.column, filter.value);
+  }).eq(filter.column, filter.value).select("customer_email, customer_name, id").single();
+
+  if (order && trackingNumber) {
+    sendOrderShippedEmail(
+      order.customer_email,
+      order.customer_name,
+      order.id.slice(0, 8),
+      trackingNumber,
+      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-builds333.vercel.app"}/orders/${order.id}`
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {

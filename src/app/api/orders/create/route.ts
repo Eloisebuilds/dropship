@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getCJClient } from "@/lib/cj/client";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendOrderConfirmationEmail } from "@/lib/resend";
 import type { CJOrderCreateResponse } from "@/lib/cj/types";
 
 interface OrderItemInput {
@@ -163,6 +164,13 @@ export async function POST(request: NextRequest) {
           .eq("id", order.id);
       }
     }
+
+    sendOrderConfirmationEmail(
+      customer.email,
+      customer.name,
+      order.id.slice(0, 8),
+      `${process.env.NEXT_PUBLIC_SITE_URL || request.headers.get("origin") || ""}/order-confirmation/${order.id}`
+    );
 
     return NextResponse.json({
       success: true,
