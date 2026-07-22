@@ -15,27 +15,19 @@ export default function ProductDetailPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const currency = useCurrency();
   const [product, setProduct] = useState(hardcodedProduct);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
       try {
         const { fetchProductById } = await import("@/lib/products");
         const dbProduct = await fetchProductById(params.id as string);
-        if (dbProduct) setProduct(dbProduct);
+        if (!cancelled && dbProduct) setProduct(dbProduct);
       } catch {}
-      setLoading(false);
     };
     load();
+    return () => { cancelled = true; };
   }, [params.id]);
-
-  if (loading) {
-    return (
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-20 text-center">
-        <p className="font-[Roboto] text-[14px] text-[#6B7280]">Loading...</p>
-      </div>
-    );
-  }
 
   if (!product) {
     return (
