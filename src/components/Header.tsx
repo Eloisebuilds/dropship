@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth/context";
 import { useState } from "react";
 
 export default function Header() {
   const { itemCount } = useCart();
+  const { user, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -22,6 +24,11 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          {user && (
+            <Link href="/orders" className="font-[Roboto] text-[14px] text-black hover:text-[#6B7280] transition-colors">
+              ORDERS
+            </Link>
+          )}
           <Link href="/cart" className="relative font-[Roboto] text-[14px] font-bold text-black hover:text-[#6B7280] transition-colors">
             CART
             {itemCount > 0 && (
@@ -30,6 +37,15 @@ export default function Header() {
               </span>
             )}
           </Link>
+          {user ? (
+            <button onClick={signOut} className="font-[Roboto] text-[14px] text-[#6B7280] hover:text-black transition-colors">
+              LOG OUT
+            </button>
+          ) : (
+            <Link href="/login" className="font-[Roboto] text-[14px] text-[#6B7280] hover:text-black transition-colors">
+              SIGN IN
+            </Link>
+          )}
 
           <button
             className="md:hidden text-black p-1"
@@ -52,6 +68,20 @@ export default function Header() {
           <Link href="/" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
             Home
           </Link>
+          {user ? (
+            <>
+              <Link href="/orders" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
+                Orders
+              </Link>
+              <button onClick={() => { signOut(); setMenuOpen(false); }} className="font-[Roboto] text-[14px] text-[#6B7280] text-left">
+                Log Out
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
+              Sign In
+            </Link>
+          )}
         </div>
       )}
     </header>

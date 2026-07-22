@@ -11,7 +11,6 @@ export default function CartPage() {
   const currency = useCurrency();
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -71,7 +70,7 @@ export default function CartPage() {
         window.location.href = data.redirectUrl;
       } else {
         clearCart();
-        setCheckoutSuccess(true);
+        window.location.href = `/order-confirmation/${data.orderId}`;
       }
     } catch (error: unknown) {
       setCheckoutError(error instanceof Error ? error.message : "Checkout failed. Please try again.");
@@ -79,24 +78,6 @@ export default function CartPage() {
       setCheckingOut(false);
     }
   };
-
-  if (checkoutSuccess) {
-    return (
-      <div className="max-w-[600px] mx-auto px-4 md:px-6 py-20 text-center">
-        <div className="text-[48px] mb-6">&#10003;</div>
-        <h1 className="font-[Montserrat] font-bold text-[24px] text-black mb-3">Order Placed!</h1>
-        <p className="font-[Roboto] text-[14px] text-[#6B7280] mb-8">
-          Your order has been submitted. You will receive a confirmation email shortly.
-        </p>
-        <Link
-          href="/"
-          className="inline-block bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#6B7280] transition-colors"
-        >
-          Continue Shopping
-        </Link>
-      </div>
-    );
-  }
 
   if (items.length === 0) {
     return (

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import { getCJClient } from "@/lib/cj/client";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { CJOrderCreateResponse } from "@/lib/cj/types";
@@ -38,11 +39,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const authSupabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return request.cookies.getAll(); },
+          setAll() {},
+        },
+      }
+    );
+    const { data: { user } } = await authSupabase.auth.getUser();
+
     const supabase = createServiceClient();
 
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
+        user_id: user?.id || null,
         customer_email: customer.email,
         customer_name: customer.name,
         shipping_address: shipping?.address || "N/A",
@@ -154,6 +168,7 @@ export async function POST(request: NextRequest) {
       success: true,
       orderId: order.id,
       cjOrderId: cjResult?.data?.orderId || null,
+      redirectUrl: null,
       message: cj
         ? "Order created and sent to supplier"
         : "Order saved locally. CJ API key not configured.",
