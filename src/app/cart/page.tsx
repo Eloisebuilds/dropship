@@ -3,14 +3,21 @@
 import Image from "next/image";
 import { useCart } from "@/lib/cart";
 import { useCurrency, formatPrice } from "@/lib/currency";
+import { useAuth } from "@/lib/auth/context";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
+  const { user, loading: authLoading } = useAuth();
   const currency = useCurrency();
+  const supabase = createClient();
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [loadedAddress, setLoadedAddress] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -27,9 +34,37 @@ export default function CartPage() {
   const updateField = (field: string, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  useEffect(() => {
+    if (authLoading || loadedAddress) return;
+    if (!user) return;
+
+    const saved = user.user_metadata?.last_shipping_address;
+    setForm((prev) => ({
+      ...prev,
+      name: saved?.name || user.user_metadata?.full_name || prev.name || user.email?.split("@")[0] || "",
+      email: saved?.email || user.email || prev.email || "",
+      phone: saved?.phone || prev.phone || "",
+      address: saved?.address || prev.address || "",
+      city: saved?.city || prev.city || "",
+      province: saved?.province || prev.province || "",
+      zip: saved?.zip || prev.zip || "",
+      country: saved?.country || prev.country || "United States",
+      countryCode: saved?.countryCode || prev.countryCode || "US",
+    }));
+    setLoadedAddress(true);
+  }, [user, authLoading, loadedAddress]);
+
   const handleCheckout = async () => {
-    if (!form.name || !form.email || !form.address || !form.city) {
-      setCheckoutError("Please fill in name, email, address, and city.");
+    const errors: string[] = [];
+    if (!form.name.trim()) errors.push("Full name");
+    if (!form.email.trim()) errors.push("Email");
+    else if (!EMAIL_REGEX.test(form.email)) errors.push("Valid email");
+    if (!form.address.trim()) errors.push("Street address");
+    if (!form.city.trim()) errors.push("City");
+    if (!form.zip.trim()) errors.push("ZIP / Postal code");
+
+    if (errors.length > 0) {
+      setCheckoutError(`Please fill in: ${errors.join(", ")}.`);
       return;
     }
 
@@ -63,6 +98,23 @@ export default function CartPage() {
 
       if (!res.ok) {
         throw new Error(data.error || "Checkout failed");
+      }
+
+      if (user) {
+        const addressData = {
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          province: form.province,
+          zip: form.zip,
+          country: form.country,
+          countryCode: form.countryCode,
+        };
+        await supabase.auth.updateUser({
+          data: { last_shipping_address: addressData },
+        });
       }
 
       if (data.redirectUrl) {

@@ -55,13 +55,21 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
 
+    const fullAddress = [
+      shipping?.address,
+      shipping?.city,
+      shipping?.province,
+      shipping?.zip,
+      shipping?.country,
+    ].filter(Boolean).join(", ");
+
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_id: user?.id || null,
         customer_email: customer.email,
         customer_name: customer.name,
-        shipping_address: shipping?.address || "N/A",
+        shipping_address: fullAddress || "N/A",
         status: "pending",
         total: items.reduce(
           (sum: number, item: OrderItemInput) => sum + (item.product?.price || 0) * item.quantity,
