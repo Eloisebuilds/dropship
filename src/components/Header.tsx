@@ -3,12 +3,26 @@
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth/context";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function Header() {
   const { itemCount } = useCart();
   const { user, loading, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#E5E7EB]">
@@ -21,14 +35,14 @@ export default function Header() {
           <Link href="/" className="font-[Roboto] text-[14px] font-normal text-black hover:text-[#6B7280] transition-colors">
             Home
           </Link>
+          {user && (
+            <Link href="/orders" className="font-[Roboto] text-[14px] text-black hover:text-[#6B7280] transition-colors">
+              Orders
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-4">
-          {user && (
-            <Link href="/orders" className="font-[Roboto] text-[14px] text-black hover:text-[#6B7280] transition-colors">
-              ORDERS
-            </Link>
-          )}
           <Link href="/cart" className="relative font-[Roboto] text-[14px] font-bold text-black hover:text-[#6B7280] transition-colors">
             CART
             {itemCount > 0 && (
@@ -37,10 +51,62 @@ export default function Header() {
               </span>
             )}
           </Link>
+
           {loading ? null : user ? (
-            <button onClick={signOut} className="font-[Roboto] text-[14px] text-[#6B7280] hover:text-black transition-colors">
-              LOG OUT
-            </button>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-1.5 font-[Roboto] text-[12px] text-black hover:text-[#6B7280] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                {displayName}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${dropdownOpen ? "rotate-180" : ""}`}>
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-[180px] bg-white border border-[#E5E7EB] rounded-[8px] shadow-lg overflow-hidden">
+                  <Link
+                    href="/account"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 font-[Roboto] text-[14px] text-black hover:bg-[#F9FAFB] transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    My Account
+                  </Link>
+                  <Link
+                    href="/orders"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 font-[Roboto] text-[14px] text-black hover:bg-[#F9FAFB] transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                    </svg>
+                    Orders
+                  </Link>
+                  <hr className="border-[#E5E7EB]" />
+                  <button
+                    onClick={() => { signOut(); setDropdownOpen(false); }}
+                    className="flex items-center gap-2 w-full px-4 py-3 font-[Roboto] text-[14px] text-[#991B1B] hover:bg-[#FEF2F2] transition-colors text-left"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                      <polyline points="16 17 21 12 16 7" />
+                      <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Log Out
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <Link href="/login" className="font-[Roboto] text-[14px] text-[#6B7280] hover:text-black transition-colors">
               SIGN IN
@@ -68,12 +134,17 @@ export default function Header() {
           <Link href="/" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
             Home
           </Link>
-          {loading ? null : user ? (
+          {user ? (
             <>
+              <Link href="/account" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
+                My Account
+              </Link>
               <Link href="/orders" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
                 Orders
               </Link>
-              <button onClick={() => { signOut(); setMenuOpen(false); }} className="font-[Roboto] text-[14px] text-[#6B7280] text-left">
+              <hr className="border-[#E5E7EB]" />
+              <p className="font-[Roboto] text-[12px] text-[#6B7280]">{user.email}</p>
+              <button onClick={() => { signOut(); setMenuOpen(false); }} className="font-[Roboto] text-[14px] text-[#991B1B] text-left">
                 Log Out
               </button>
             </>
