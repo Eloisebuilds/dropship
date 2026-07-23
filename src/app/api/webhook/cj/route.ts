@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
-import { sendOrderShippedEmail } from "@/lib/resend";
+import { sendOrderShippedEmail, sendOrderDeliveredEmail } from "@/lib/resend";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 function verifySignature(sign: string, rawBody: string, openId: string): boolean {
@@ -80,6 +80,15 @@ async function handleOrderUpdate(params: Record<string, unknown>, supabase: Supa
       order.customer_name,
       order.id.slice(0, 8),
       trackNumber || null,
+      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-builds333.vercel.app"}/orders/${order.id}`
+    );
+  }
+
+  if (order && orderStatus === "DELIVERED") {
+    sendOrderDeliveredEmail(
+      order.customer_email,
+      order.customer_name,
+      order.id.slice(0, 8),
       `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-builds333.vercel.app"}/orders/${order.id}`
     );
   }

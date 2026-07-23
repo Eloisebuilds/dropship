@@ -8,6 +8,7 @@ import type { CJOrderCreateResponse } from "@/lib/cj/types";
 interface OrderItemInput {
   product?: {
     id?: string;
+    name?: string;
     price?: number;
     cjVariantId?: string;
   };
@@ -165,10 +166,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const productName = items[0]?.product?.name || "Product";
+    const orderTotal = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(order.total);
+
     sendOrderConfirmationEmail(
       customer.email,
       customer.name,
       order.id.slice(0, 8),
+      productName,
+      orderTotal,
       `${process.env.NEXT_PUBLIC_SITE_URL || request.headers.get("origin") || ""}/order-confirmation/${order.id}`
     );
 
