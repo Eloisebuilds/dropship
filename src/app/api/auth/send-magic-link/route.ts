@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+
     const supabase = createServiceClient();
     const redirectTo = new URL("/auth/callback", request.url).toString();
 
@@ -25,11 +26,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Failed to generate sign-in link: ${error.message}` }, { status: 500 });
     }
 
-    const loginUrl = data.properties?.action_link;
+    let loginUrl = data.properties?.action_link;
 
     if (!loginUrl) {
       return NextResponse.json({ error: "No sign-in link generated" }, { status: 500 });
     }
+
+    const urlObj = new URL(loginUrl);
+    urlObj.searchParams.set("redirect_to", redirectTo);
+    loginUrl = urlObj.toString();
 
     const sent = await sendMagicLinkEmail(normalizedEmail, loginUrl);
 
