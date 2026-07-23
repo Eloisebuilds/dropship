@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServiceClient } from "@/lib/supabase/server";
 import { sendMagicLinkEmail } from "@/lib/resend";
 
 export async function POST(request: NextRequest) {
@@ -10,28 +10,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return request.cookies.getAll(); },
-          setAll() {},
-        },
-      }
-    );
-
+    const normalizedEmail = email.toLowerCase().trim();
+    const supabase = createServiceClient();
     const redirectTo = new URL("/auth/callback", request.url).toString();
 
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "magiclink",
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       options: { redirectTo },
     });
 
     if (error) {
-      console.error("Supabase generateLink error:", error.message);
-      return NextResponse.json({ error: "Failed to generate sign-in link" }, { status: 500 });
+      console.error("Supabase generateLink error:", JSON.stringify(error));
+      return NextResponse.json({ error: `Failed to generate sign-in link: ${error.message}` }, { status: 500 });
     }
 
     const loginUrl = data.properties?.action_link;
@@ -40,7 +31,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No sign-in link generated" }, { status: 500 });
     }
 
-    const sent = await sendMagicLinkEmail(email, loginUrl);
+    const sent = await sendMagicLinkEmail(normalizedEmail, loginUrl);
 
     if (!sent) {
       return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
@@ -49,6 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     console.error("send-magic-link error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
