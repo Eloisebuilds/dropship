@@ -331,30 +331,17 @@ function getCountryFromTimezone(): string | null {
   }
 }
 
-function getInitialCurrency(): string {
-  const country = getCountryFromTimezone();
-  if (country) {
-    const cur = COUNTRY_CURRENCY[country];
-    if (cur && CURRENCY_MAP[cur]) return cur;
-  }
-  return "EUR";
-}
-
 export function useCurrency() {
-  const [currency, setCurrency] = useState<string>(getInitialCurrency);
+  const [currency, setCurrency] = useState<string>("USD");
 
   useEffect(() => {
-    fetch("https://ipapi.co/json/")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.country_code) {
-          const cur = COUNTRY_CURRENCY[data.country_code];
-          if (cur && CURRENCY_MAP[cur]) {
-            setCurrency(cur);
-          }
-        }
-      })
-      .catch(() => {});
+    const country = getCountryFromTimezone();
+    if (country) {
+      const cur = COUNTRY_CURRENCY[country];
+      if (cur && CURRENCY_MAP[cur]) {
+        setCurrency(cur);
+      }
+    }
   }, []);
 
   return currency;

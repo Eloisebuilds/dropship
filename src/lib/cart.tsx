@@ -40,8 +40,15 @@ function saveCart(items: CartItem[]) {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(loadCart);
+  const [items, setItems] = useState<CartItem[]>([]);
   const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    const saved = loadCart();
+    if (saved.length > 0) {
+      setItems(saved);
+    }
+  }, []);
 
   useEffect(() => {
     if (isFirstRender.current) {

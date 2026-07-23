@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function CookieBanner() {
-  const [visible, setVisible] = useState(() => {
-    if (typeof window !== "undefined") {
-      return !localStorage.getItem("cookie-accepted");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem("cookie-accepted")) {
+      setVisible(true);
     }
-    return false;
-  });
+  }, []);
 
   if (!visible) return null;
 
