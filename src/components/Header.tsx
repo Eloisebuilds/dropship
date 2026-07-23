@@ -7,7 +7,7 @@ import { useState } from "react";
 
 export default function Header() {
   const { itemCount } = useCart();
-  const { user, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -37,7 +37,7 @@ export default function Header() {
               </span>
             )}
           </Link>
-          {user ? (
+          {loading ? null : user ? (
             <button onClick={signOut} className="font-[Roboto] text-[14px] text-[#6B7280] hover:text-black transition-colors">
               LOG OUT
             </button>
@@ -68,7 +68,7 @@ export default function Header() {
           <Link href="/" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
             Home
           </Link>
-          {user ? (
+          {loading ? null : user ? (
             <>
               <Link href="/orders" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
                 Orders
