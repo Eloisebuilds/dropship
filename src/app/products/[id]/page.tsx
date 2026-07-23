@@ -14,6 +14,7 @@ export default function ProductDetailPage() {
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const currency = useCurrency();
   const [product, setProduct] = useState(hardcodedProduct);
 
@@ -42,8 +43,11 @@ export default function ProductDetailPage() {
   }
 
   const handleAdd = () => {
-    addItem(product, "One Size", "Standard");
+    for (let i = 0; i < quantity; i++) {
+      addItem(product, "One Size", "Standard");
+    }
     setAdded(true);
+    setQuantity(1);
     setTimeout(() => setAdded(false), 2000);
   };
 
@@ -136,12 +140,29 @@ export default function ProductDetailPage() {
               ))}
             </div>
 
-            <button
-              onClick={handleAdd}
-              className="w-full h-[48px] bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] hover:bg-[#6B7280] transition-colors"
-            >
-              {added ? "Added to Cart ✓" : `Add to Cart — ${formatPrice(product.price, currency)}`}
-            </button>
+            <div className="flex gap-3">
+              <div className="flex items-center border border-[#E5E7EB] rounded-[4px]">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="w-[44px] h-[48px] font-[Roboto] text-[18px] text-black hover:bg-[#F9FAFB] transition-colors flex items-center justify-center"
+                >
+                  &minus;
+                </button>
+                <span className="w-[48px] font-[Roboto] text-[16px] font-bold text-black text-center">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                  className="w-[44px] h-[48px] font-[Roboto] text-[18px] text-black hover:bg-[#F9FAFB] transition-colors flex items-center justify-center"
+                >
+                  +
+                </button>
+              </div>
+              <button
+                onClick={handleAdd}
+                className="flex-1 h-[48px] bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] hover:bg-[#6B7280] transition-colors"
+              >
+                {added ? "Added to Cart ✓" : `Add to Cart — ${formatPrice(product.price * quantity, currency)}`}
+              </button>
+            </div>
 
             <div className="flex items-center gap-6 mt-4">
               {["Secure Checkout"].map((t) => (

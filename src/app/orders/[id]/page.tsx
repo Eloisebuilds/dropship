@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/context";
 import { formatPrice } from "@/lib/currency";
@@ -27,6 +28,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   cj_variant_id: string | null;
+  products: { name: string; image_url: string } | null;
 }
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -58,7 +60,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         setOrder(orderData);
         const { data: itemsData } = await supabase
           .from("order_items")
-          .select("*")
+          .select("*, products(name, image_url)")
           .eq("order_id", orderData.id);
 
         if (itemsData) setItems(itemsData);
@@ -150,14 +152,22 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       <div className="border border-[#E5E7EB] rounded-[8px] p-6 bg-white mb-6">
         <h2 className="font-[Montserrat] font-bold text-[17px] text-black mb-4">Items</h2>
         {items.map((item) => (
-          <div key={item.id} className="flex justify-between py-2 border-b border-[#E5E7EB] last:border-0">
-            <div>
-              <p className="font-[Roboto] text-[14px] text-black">Qty: {item.quantity}</p>
-              {item.cj_variant_id && (
-                <p className="font-[Roboto] text-[12px] text-[#6B7280]">Variant: {item.cj_variant_id}</p>
-              )}
+          <div key={item.id} className="flex gap-4 py-4 border-b border-[#E5E7EB] last:border-0">
+            {item.products?.image_url && (
+              <div className="w-[64px] h-[64px] bg-[#F3F4F6] rounded-[4px] overflow-hidden shrink-0 relative">
+                <Image src={item.products.image_url} alt={item.products.name || "Product"} fill className="object-contain" sizes="64px" />
+              </div>
+            )}
+            <div className="flex-1 flex justify-between items-start">
+              <div>
+                <p className="font-[Roboto] text-[14px] text-black font-bold">{item.products?.name || "Product"}</p>
+                <p className="font-[Roboto] text-[12px] text-[#6B7280] mt-0.5">Qty: {item.quantity}</p>
+                {item.cj_variant_id && (
+                  <p className="font-[Roboto] text-[12px] text-[#6B7280]">Variant: {item.cj_variant_id}</p>
+                )}
+              </div>
+              <span className="font-[Roboto] text-[14px] text-black font-bold ml-4 shrink-0">{formatPrice(item.price * item.quantity, "USD")}</span>
             </div>
-            <span className="font-[Roboto] text-[14px] text-black font-bold">{formatPrice(item.price * item.quantity, "USD")}</span>
           </div>
         ))}
       </div>
