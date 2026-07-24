@@ -1,0 +1,49 @@
+name: Deploy and Migrate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  SUPABASE_URL: https://zekmjeuqblbdhgiwdqjt.supabase.co
+  SUPABASE_DB_PASSWORD: v&D%nHB5cE^3dxw
+
+jobs:
+  migrate:
+    name: Run Supabase Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Run migrations
+        run: |
+          npx supabase db push --project-ref zekmjeuqblbdhgiwdqjt
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  deploy:
+    name: Deploy to Vercel
+    needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
