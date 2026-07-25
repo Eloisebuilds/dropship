@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { createServerClient } from "@supabase/ssr";
 
-const ADMIN_EMAIL = "reinagrim@gmail.com";
+const ADMIN_EMAIL = "uaerealprojects@gmail.com";
 
 async function checkAdmin(request: NextRequest) {
   const supabase = createServerClient(
