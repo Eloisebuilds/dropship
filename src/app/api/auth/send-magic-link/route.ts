@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = email.toLowerCase().trim();
 
     const supabase = createServiceClient();
-    const redirectTo = new URL("/auth/callback", request.url).toString();
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${request.headers.get("host") || "dropship-sooty.vercel.app"}`;
+    const redirectTo = new URL("/auth/callback", siteUrl).toString();
 
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "magiclink",

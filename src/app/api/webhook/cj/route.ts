@@ -80,7 +80,7 @@ async function handleOrderUpdate(params: Record<string, unknown>, supabase: Supa
       order.customer_name,
       order.id.slice(0, 8),
       trackNumber || null,
-      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-builds333.vercel.app"}/orders/${order.id}`
+      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-sooty.vercel.app"}/orders/${order.id}`
     );
   }
 
@@ -89,7 +89,7 @@ async function handleOrderUpdate(params: Record<string, unknown>, supabase: Supa
       order.customer_email,
       order.customer_name,
       order.id.slice(0, 8),
-      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-builds333.vercel.app"}/orders/${order.id}`
+      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-sooty.vercel.app"}/orders/${order.id}`
     );
   }
 }
@@ -113,7 +113,7 @@ async function handleLogisticUpdate(params: Record<string, unknown>, supabase: S
       order.customer_name,
       order.id.slice(0, 8),
       trackingNumber,
-      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-builds333.vercel.app"}/orders/${order.id}`
+      `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-sooty.vercel.app"}/orders/${order.id}`
     );
   }
 }

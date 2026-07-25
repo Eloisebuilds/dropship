@@ -48,7 +48,7 @@ export async function sendWelcomeEmail(email: string, customerName: string): Pro
       id: TEMPLATES.welcome,
       variables: {
         CUSTOMER_NAME: customerName,
-        ACCOUNT_URL: `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-builds333.vercel.app"}/orders`,
+        ACCOUNT_URL: `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-sooty.vercel.app"}/orders`,
       } as Record<string, string | number>,
     },
   });
