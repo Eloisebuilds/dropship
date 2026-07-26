@@ -15,19 +15,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "CJ_API_KEY not configured" }, { status: 400 });
     }
 
-    const [detail, variants, inventory] = await Promise.all([
+    const [detail, variants, totalInventory] = await Promise.all([
       cj.getProductDetails(pid),
       cj.getVariants(pid),
-      cj.getInventory(pid),
+      cj.getTotalInventory(pid),
     ]);
 
     const defaultVariant = variants[0];
-
-    const totalInventory = Object.values(inventory).reduce(
-      (sum, warehouses) =>
-        sum + warehouses.reduce((s, w) => s + (w.storageNum || 0), 0),
-      0
-    );
 
     const cjPrice = parseFloat(defaultVariant?.variantSellPrice || detail.sellPrice?.toString() || "0");
     const marginPercent = 58;

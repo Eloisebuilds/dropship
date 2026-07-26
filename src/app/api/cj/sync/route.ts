@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCJClient } from "@/lib/cj/client";
 import { createServiceClient } from "@/lib/supabase/server";
-import type { CJProductListItem, CJVariant, CJInventoryItem } from "@/lib/cj/types";
+import type { CJProductListItem } from "@/lib/cj/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,22 +40,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [detail, variants, inventory] = await Promise.all([
+    const [detail, variants, totalInventory] = await Promise.all([
       cj.getProductDetails(pid),
       cj.getVariants(pid),
-      cj.getInventory(pid),
+      cj.getTotalInventory(pid),
     ]);
 
     const defaultVariant = variants[0];
     if (!defaultVariant) {
       return NextResponse.json({ error: "No variant found" }, { status: 404 });
     }
-
-    const totalInventory = Object.values(inventory).reduce(
-      (sum: number, warehouses: CJInventoryItem[]) =>
-        sum + warehouses.reduce((s: number, w: CJInventoryItem) => s + (w.storageNum || 0), 0),
-      0
-    );
 
     const cjPrice = parseFloat(defaultVariant.variantSellPrice || detail.sellPrice?.toString() || "0");
     const marginPercent = 58;
@@ -114,7 +108,7 @@ export async function POST(request: NextRequest) {
       cj_image_url: productImage,
       cj_sell_price: cjPrice,
       cj_now_price: parseFloat(importedProduct?.nowPrice || "0") || cjPrice,
-      warehouse_inventory: inventory,
+      warehouse_inventory: totalInventory,
       last_synced_at: new Date().toISOString(),
     };
 

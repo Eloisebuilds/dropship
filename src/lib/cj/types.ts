@@ -84,18 +84,36 @@ export interface CJProductDetail {
   status?: string;
 }
 
-export interface CJInventoryItem {
-  vid: string;
-  areaId: string;
-  areaEn: string;
+export interface CJVariantInventory {
   countryCode: string;
-  storageNum: number;
+  totalInventory: number;
+  cjInventory?: number;
+  factoryInventory?: number;
+  verifiedWarehouse?: number;
 }
 
-export interface CJInventoryResponse {
+export interface CJVariantInventoryEntry {
+  vid: string;
+  inventory: CJVariantInventory[];
+}
+
+export interface CJInventoryByPidData {
+  inventories: {
+    areaEn: string;
+    areaId: number;
+    countryCode: string;
+    totalInventoryNum: number;
+    cjInventoryNum?: number;
+    factoryInventoryNum?: number;
+  }[];
+  variantInventories: CJVariantInventoryEntry[];
+}
+
+export interface CJInventoryByPidResponse {
   code: number;
   result: boolean;
-  data: Record<string, CJInventoryItem[]>;
+  message: string;
+  data: CJInventoryByPidData;
 }
 
 export interface CJOrderCreateResponse {

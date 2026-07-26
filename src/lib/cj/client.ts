@@ -3,7 +3,7 @@ import {
   CJProductListResponse,
   CJProductDetail,
   CJVariant,
-  CJInventoryItem,
+  CJInventoryByPidResponse,
   CJOrderCreateResponse,
 } from "./types";
 
@@ -130,10 +130,35 @@ export class CJClient {
     return res.data || [];
   }
 
-  async getInventory(pid: string): Promise<Record<string, CJInventoryItem[]>> {
+  async getInventory(pid: string): Promise<CJInventoryByPidResponse["data"] | null> {
     const params = new URLSearchParams({ pid });
-    const res = await this.request<{ code: number; result: boolean; data: Record<string, CJInventoryItem[]> }>("GET", `/product/stock/getInventoryByPid?${params}`);
-    return res.data || {};
+    const res = await this.request<CJInventoryByPidResponse>("GET", `/product/stock/getInventoryByPid?${params}`);
+    return res.data || null;
+  }
+
+  async getTotalInventory(pid: string): Promise<number> {
+    const data = await this.getInventory(pid);
+    if (!data) return 0;
+
+    let total = 0;
+
+    if (data.inventories) {
+      for (const inv of data.inventories) {
+        total += inv.totalInventoryNum || 0;
+      }
+    }
+
+    if (data.variantInventories) {
+      for (const entry of data.variantInventories) {
+        if (entry.inventory) {
+          for (const inv of entry.inventory) {
+            total += inv.totalInventory || 0;
+          }
+        }
+      }
+    }
+
+    return total;
   }
 
   async createOrder(params: {
