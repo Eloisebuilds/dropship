@@ -51,9 +51,7 @@ export async function fetchProducts(): Promise<Product[]> {
   try {
     const baseUrl = typeof window !== "undefined"
       ? window.location.origin
-      : process.env.NEXT_PUBLIC_VERCEL_URL
-        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-        : "http://localhost:3000";
+      : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     const res = await fetch(`${baseUrl}/api/products`, { cache: "no-store" });
     if (!res.ok) return products;
     const data = await res.json();

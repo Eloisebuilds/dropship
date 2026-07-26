@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest) {
         order.customer_name,
         order.id.slice(0, 8),
         order.cj_tracking_number || "N/A",
-        `${process.env.NEXT_PUBLIC_SITE_URL}/orders/${order.id}`
+        `${process.env.NEXT_PUBLIC_SITE_URL || "https://shopfavoritems.com"}/orders/${order.id}`
       );
     }
 
@@ -77,7 +77,7 @@ export async function PATCH(request: NextRequest) {
         order.customer_email,
         order.customer_name,
         order.id.slice(0, 8),
-        `${process.env.NEXT_PUBLIC_SITE_URL}/orders/${order.id}`
+        `${process.env.NEXT_PUBLIC_SITE_URL || "https://shopfavoritems.com"}/orders/${order.id}`
       );
     }
 

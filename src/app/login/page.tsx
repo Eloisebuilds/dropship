@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth/context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -12,6 +12,8 @@ export default function LoginPage() {
   const [sending, setSending] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams?.get("redirect") || "/orders";
 
   if (user) {
     router.push("/orders");
@@ -27,7 +29,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/send-magic-link", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, redirect }),
       });
 
       const data = await res.json();

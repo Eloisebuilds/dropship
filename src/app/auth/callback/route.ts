@@ -3,9 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { sendWelcomeEmail } from "@/lib/resend";
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/orders";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${request.headers.get("host") || "shopfavoritems.com"}`;
 
   if (code) {
     let supabaseResponse = NextResponse.next({ request });
@@ -48,13 +49,15 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      const response = NextResponse.redirect(`${origin}${next}`);
+      const response = NextResponse.redirect(`${siteUrl}${next}`);
       supabaseResponse.cookies.getAll().forEach((cookie) => {
         response.cookies.set(cookie.name, cookie.value, { ...cookie });
       });
       return response;
     }
+
+    console.error("Auth callback error:", error);
   }
 
-  return NextResponse.redirect(`${origin}/?error=auth_failed`);
+  return NextResponse.redirect(`${siteUrl}/?error=auth_failed`);
 }

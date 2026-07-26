@@ -4,17 +4,18 @@ import { sendMagicLinkEmail } from "@/lib/resend";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const { email, redirect: redirectPath } = await request.json();
 
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    const next = typeof redirectPath === "string" ? redirectPath : "/orders";
 
     const supabase = createServiceClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${request.headers.get("host") || "dropship-sooty.vercel.app"}`;
-    const redirectTo = new URL("/auth/callback", siteUrl).toString();
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${request.headers.get("host") || "shopfavoritems.com"}`;
+    const redirectTo = new URL(`/auth/callback?next=${encodeURIComponent(next)}`, siteUrl).toString();
 
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "magiclink",

@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
       order.id.slice(0, 8),
       productName,
       orderTotal,
-      `${process.env.NEXT_PUBLIC_SITE_URL || request.headers.get("origin") || ""}/order-confirmation/${order.id}`
+      `${process.env.NEXT_PUBLIC_SITE_URL || "https://shopfavoritems.com"}/order-confirmation/${order.id}`
     );
 
     return NextResponse.json({

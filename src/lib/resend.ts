@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const FROM = "FavorItems <onboarding@resend.dev>";
+const FROM = "FavorItems <noreply@shopfavoritems.com>";
 
 const TEMPLATES = {
   magicLink: "f9b7acaa-cbd3-46a0-b3f7-c28bb15fff1f",
@@ -48,7 +48,7 @@ export async function sendWelcomeEmail(email: string, customerName: string): Pro
       id: TEMPLATES.welcome,
       variables: {
         CUSTOMER_NAME: customerName,
-        ACCOUNT_URL: `${process.env.NEXT_PUBLIC_SITE_URL || "https://dropship-sooty.vercel.app"}/orders`,
+        ACCOUNT_URL: `${process.env.NEXT_PUBLIC_SITE_URL || "https://shopfavoritems.com"}/orders`,
       } as Record<string, string | number>,
     },
   });

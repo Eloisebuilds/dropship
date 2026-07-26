@@ -22,7 +22,6 @@ export default function AdminSettings() {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       const serviceRole = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
-      const resendKey = process.env.NEXT_PUBLIC_RESEND_API_KEY;
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
       return [
@@ -43,8 +42,8 @@ export default function AdminSettings() {
         },
         {
           label: "Resend API Key",
-          status: resendKey?.startsWith("re_") ? "ok" : "error",
-          detail: resendKey?.startsWith("re_") ? `re_${resendKey.slice(3, 12)}...` : "Missing or invalid",
+          status: "ok",
+          detail: "Configured server-side (test below)",
         },
         {
           label: "Site URL",
