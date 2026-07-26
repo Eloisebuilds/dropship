@@ -130,6 +130,34 @@ export default function AdminSettings() {
       </section>
 
       <section className="mb-8">
+        <h2 className="font-[Roboto] text-[14px] text-black font-bold mb-3">Database Setup</h2>
+        <p className="font-[Roboto] text-[12px] text-[#6B7280] mb-3">Run database migrations and create storage buckets for product images.</p>
+        <button
+          onClick={async () => {
+            const btn = document.getElementById("setup-btn") as HTMLButtonElement;
+            btn.disabled = true;
+            btn.textContent = "Running...";
+            try {
+              const res = await fetch("/api/admin/database/setup", { method: "POST" });
+              const data = await res.json();
+              const details = data.results?.map((r: { step: string; status: string; message?: string }) =>
+                `${r.step}: ${r.status}${r.message ? ` (${r.message.slice(0, 100)})` : ""}`
+              ).join("\n") || "No details";
+              alert(`Setup ${data.success ? "completed" : "completed with errors"}\n\n${details}`);
+            } catch {
+              alert("Setup request failed");
+            }
+            btn.disabled = false;
+            btn.textContent = "Run Setup";
+          }}
+          id="setup-btn"
+          className="h-[40px] px-4 bg-black text-white font-[Roboto] text-[13px] font-bold rounded-[4px] hover:bg-[#6B7280] disabled:opacity-50 transition-colors"
+        >
+          Run Setup
+        </button>
+      </section>
+
+      <section className="mb-8">
         <h2 className="font-[Roboto] text-[14px] text-black font-bold mb-3">Email</h2>
         <div className="flex gap-2">
           <input

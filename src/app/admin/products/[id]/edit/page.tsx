@@ -59,12 +59,12 @@ export default function EditProduct({ params }: { params: Promise<{ id: string }
           margin_percent: data.margin_percent?.toString() || "30",
         });
       }
-      const { data: imgs } = await supabase
+      const { data: imgs, error: imgError } = await supabase
         .from("product_images")
         .select("*")
         .eq("product_id", id)
         .order("position", { ascending: true });
-      if (imgs) setImages(imgs);
+      if (!imgError && imgs) setImages(imgs);
       setLoading(false);
     })();
   }, [params]);
