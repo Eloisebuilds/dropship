@@ -27,7 +27,9 @@ export class CJClient {
     body?: Record<string, unknown>,
     isAuth: boolean = false
   ): Promise<T> {
-    await this.ensureToken();
+    if (!isAuth) {
+      await this.ensureToken();
+    }
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
