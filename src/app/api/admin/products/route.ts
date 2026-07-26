@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { createServerClient } from "@supabase/ssr";
+import { getCJClient } from "@/lib/cj/client";
 
 const ADMIN_EMAIL = "uaerealprojects@gmail.com";
 
@@ -36,7 +37,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "name and price are required" }, { status: 400 });
     }
 
+    const pid = cj_product_id ? String(cj_product_id).trim() : null;
+    let realInventory = stock_quantity ?? 10;
+
+    if (pid) {
+      const cj = getCJClient();
+      if (cj) {
+        try {
+          realInventory = await cj.getTotalInventory(pid);
+        } catch {
+          // fall back to client-supplied value
+        }
+      }
+    }
+
     const supabase = createServiceClient();
+    const now = new Date().toISOString();
     const { data, error } = await supabase
       .from("products")
       .insert({
@@ -45,10 +61,10 @@ export async function POST(request: NextRequest) {
         price,
         image_url: image_url || null,
         supplier_url: supplier_url || null,
-        stock_quantity: stock_quantity ?? 10,
-        cj_product_id: cj_product_id || null,
+        stock_quantity: realInventory,
+        cj_product_id: pid,
         cj_variant_id: cj_variant_id || null,
-        cj_last_synced_at: cj_product_id ? new Date().toISOString() : null,
+        cj_last_synced_at: pid ? now : null,
         supplier_price: supplier_price || null,
         margin_percent: margin_percent ?? 30,
       })
@@ -59,18 +75,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
     }
 
-    if (cj_product_id && data) {
+    if (pid && data) {
       const cjData: Record<string, unknown> = {
         store_product_id: data.id,
-        cj_product_id,
+        cj_product_id: pid,
         cj_variant_id: cj_variant_id || null,
         cj_sku: cj_sku || null,
         cj_spu: cj_spu || null,
         cj_image_url: image_url || null,
         cj_sell_price: supplier_price || null,
         cj_now_price: supplier_price || null,
-        warehouse_inventory: stock_quantity || 0,
-        last_synced_at: new Date().toISOString(),
+        warehouse_inventory: realInventory,
+        last_synced_at: now,
       };
 
       await supabase.from("cj_products").upsert(cjData, {
