@@ -119,14 +119,14 @@ export class CJClient {
   }
 
   async getProductDetails(pid: string): Promise<CJProductDetail> {
-    const params = new URLSearchParams({ pid });
-    const res = await this.request<{ code: number; result: boolean; data: CJProductDetail }>("GET", `/product/getDetails?${params}`);
+    const params = new URLSearchParams({ pid, features: "enable_video" });
+    const res = await this.request<{ code: number; result: boolean; data: CJProductDetail }>("GET", `/product/query?${params}`);
     return res.data;
   }
 
   async getVariants(pid: string): Promise<CJVariant[]> {
     const params = new URLSearchParams({ pid });
-    const res = await this.request<{ code: number; result: boolean; data: CJVariant[] }>("GET", `/product/variant/list?${params}`);
+    const res = await this.request<{ code: number; result: boolean; data: CJVariant[] }>("GET", `/product/variant/query?${params}`);
     return res.data || [];
   }
 

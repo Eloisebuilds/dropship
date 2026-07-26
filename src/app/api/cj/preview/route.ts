@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       cj.getInventory(pid),
     ]);
 
-    const defaultVariant = variants.find((v) => v.variantStatus === 1) || variants[0];
+    const defaultVariant = variants[0];
 
     const totalInventory = Object.values(inventory).reduce(
       (sum, warehouses) =>
@@ -33,13 +33,14 @@ export async function GET(request: NextRequest) {
     const marginPercent = 58;
     const exchangeRate = 0.92;
     const storePrice = Math.round(cjPrice * exchangeRate * (1 + marginPercent / 100) * 100) / 100;
+    const productImage = detail.bigImage || (detail.productImageSet && detail.productImageSet[0]) || "";
 
     return NextResponse.json({
       pid: detail.pid || pid,
       name: detail.productNameEn || "Imported Product",
       description: detail.description || "",
-      image: detail.productImage || "",
-      images: [],
+      image: productImage,
+      images: detail.productImageSet || [],
       cjPrice,
       storePrice,
       originalPrice: Math.round(storePrice * 2 * 100) / 100,
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       variants: variants.map((v) => ({
         id: v.vid,
         sku: v.variantSku,
-        name: v.variantName || "",
+        name: v.variantNameEn || v.variantName || v.variantKey || "",
         price: v.variantSellPrice,
         image: v.variantImage || "",
         weight: v.variantWeight,

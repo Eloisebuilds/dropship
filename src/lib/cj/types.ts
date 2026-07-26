@@ -46,11 +46,13 @@ export interface CJProductListResponse {
 
 export interface CJVariant {
   vid: string;
-  variantName: string;
+  pid?: string;
+  variantName?: string;
+  variantNameEn?: string;
   variantSku: string;
-  variantImage: string;
+  variantImage?: string;
+  variantKey?: string;
   variantSellPrice: string;
-  variantStatus: number;
   variantValue1?: string;
   variantValue2?: string;
   variantValue3?: string;
@@ -58,20 +60,28 @@ export interface CJVariant {
   variantLength?: number;
   variantWidth?: number;
   variantHeight?: number;
+  variantVolume?: number;
+  createTime?: string;
 }
 
 export interface CJProductDetail {
   pid: string;
-  productName: string;
-  productNameEn: string;
-  productSku: string;
-  productImage: string;
-  productWeight: number;
-  sellPrice: number;
-  categoryId: string;
-  categoryName: string;
-  description: string;
-  variants: CJVariant[];
+  productName?: string;
+  productNameEn?: string;
+  productSku?: string;
+  bigImage?: string;
+  productImageSet?: string[];
+  productWeight?: string;
+  sellPrice?: number;
+  categoryId?: string;
+  categoryName?: string;
+  description?: string;
+  variants?: CJVariant[];
+  productProEnSet?: string[];
+  materialNameEnSet?: string[];
+  packingWeight?: string;
+  listedNum?: number;
+  status?: string;
 }
 
 export interface CJInventoryItem {

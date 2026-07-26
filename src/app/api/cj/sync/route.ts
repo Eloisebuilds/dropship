@@ -46,9 +46,9 @@ export async function POST(request: NextRequest) {
       cj.getInventory(pid),
     ]);
 
-    const defaultVariant = variants.find((v: CJVariant) => v.variantStatus === 1) || variants[0];
+    const defaultVariant = variants[0];
     if (!defaultVariant) {
-      return NextResponse.json({ error: "No active variant found" }, { status: 404 });
+      return NextResponse.json({ error: "No variant found" }, { status: 404 });
     }
 
     const totalInventory = Object.values(inventory).reduce(
@@ -65,11 +65,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServiceClient();
 
+    const productImage = detail.bigImage || (detail.productImageSet && detail.productImageSet[0]) || importedProduct?.bigImage || "";
+
     const productData = {
       name: detail.productNameEn || importedProduct?.nameEn || "Imported Product",
       description: detail.description || importedProduct?.description || "",
       price: storePrice,
-      image_url: detail.productImage || importedProduct?.bigImage || "",
+      image_url: productImage,
       stock_quantity: totalInventory,
       cj_product_id: pid,
       cj_variant_id: defaultVariant.vid,
@@ -109,7 +111,7 @@ export async function POST(request: NextRequest) {
       cj_variant_id: defaultVariant.vid,
       cj_sku: defaultVariant.variantSku || detail.productSku || "",
       cj_spu: detail.productSku || "",
-      cj_image_url: detail.productImage || "",
+      cj_image_url: productImage,
       cj_sell_price: cjPrice,
       cj_now_price: parseFloat(importedProduct?.nowPrice || "0") || cjPrice,
       warehouse_inventory: inventory,
@@ -137,7 +139,7 @@ export async function POST(request: NextRequest) {
         cjPrice,
         inventory: totalInventory,
         marginPercent,
-        image: detail.productImage,
+        image: productImage,
         cjProductId: pid,
         cjVariantId: defaultVariant.vid,
       },
