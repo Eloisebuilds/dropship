@@ -13,15 +13,19 @@ create table if not exists product_images (
 alter table product_images enable row level security;
 
 -- Public read
+drop policy if exists "Product images are viewable by everyone" on product_images;
 create policy "Product images are viewable by everyone" on product_images for select using (true);
 
 -- Admin insert
+drop policy if exists "Admins can insert product images" on product_images;
 create policy "Admins can insert product images" on product_images for insert with check (auth.role() = 'authenticated');
 
 -- Admin update
+drop policy if exists "Admins can update product images" on product_images;
 create policy "Admins can update product images" on product_images for update using (auth.role() = 'authenticated');
 
 -- Admin delete
+drop policy if exists "Admins can delete product images" on product_images;
 create policy "Admins can delete product images" on product_images for delete using (auth.role() = 'authenticated');
 
 -- Index
@@ -33,14 +37,17 @@ values ('product-images', 'product-images', true, false)
 on conflict (id) do nothing;
 
 -- Allow public read
+drop policy if exists "Public read product-images" on storage.objects;
 create policy "Public read product-images" on storage.objects for select using (bucket_id = 'product-images');
 
 -- Allow authenticated upload
+drop policy if exists "Authenticated upload product-images" on storage.objects;
 create policy "Authenticated upload product-images" on storage.objects for insert with check (
   bucket_id = 'product-images' and auth.role() = 'authenticated'
 );
 
 -- Allow authenticated delete
+drop policy if exists "Authenticated delete product-images" on storage.objects;
 create policy "Authenticated delete product-images" on storage.objects for delete using (
   bucket_id = 'product-images' and auth.role() = 'authenticated'
 );

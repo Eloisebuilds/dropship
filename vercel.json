@@ -1,4 +1,4 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npx supabase link --project-ref zekmjeuqblbdhgiwdqjt --password $SUPABASE_DB_PASSWORD && npx supabase db push --linked && next build"
+  "buildCommand": "npx supabase link --project-ref zekmjeuqblbdhgiwdqjt --password $SUPABASE_DB_PASSWORD && npx supabase db push --linked && curl -s -X POST https://zekmjeuqblbdhgiwdqjt.supabase.co/storage/v1/bucket -H \"Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY\" -H \"Content-Type: application/json\" -d '{\"id\":\"product-images\",\"name\":\"product-images\",\"public\":true}' > /dev/null 2>&1 || true && next build"
 }
