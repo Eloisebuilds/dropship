@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const FROM = "FavorItems <noreply@shopfavoritems.com>";
+const FROM = "FavorItems <support@shopfavoritems.com>";
 
 const TEMPLATES = {
   magicLink: "f9b7acaa-cbd3-46a0-b3f7-c28bb15fff1f",
