@@ -12,6 +12,8 @@ export default function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const ADMIN_EMAIL = "uaerealprojects@gmail.com";
+  const isAdmin = user?.email === ADMIN_EMAIL;
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
 
   useEffect(() => {
@@ -38,6 +40,11 @@ export default function Header() {
           {user && (
             <Link href="/orders" className="font-[Roboto] text-[14px] text-black hover:text-[#6B7280] transition-colors">
               Orders
+            </Link>
+          )}
+          {isAdmin && (
+            <Link href="/admin" className="font-[Roboto] text-[14px] font-semibold text-[#B91C1C] hover:text-[#991B1B] transition-colors">
+              Admin
             </Link>
           )}
         </nav>
@@ -70,6 +77,18 @@ export default function Header() {
 
               {dropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-[180px] bg-white border border-[#E5E7EB] rounded-[8px] shadow-lg overflow-hidden">
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-3 font-[Roboto] text-[14px] text-[#B91C1C] hover:bg-[#FEF2F2] transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z" />
+                      </svg>
+                      Admin
+                    </Link>
+                  )}
                   <Link
                     href="/account"
                     onClick={() => setDropdownOpen(false)}
@@ -136,6 +155,11 @@ export default function Header() {
           </Link>
           {user ? (
             <>
+              {isAdmin && (
+                <Link href="/admin" className="font-[Roboto] text-[14px] text-[#B91C1C] font-semibold" onClick={() => setMenuOpen(false)}>
+                  Admin
+                </Link>
+              )}
               <Link href="/account" className="font-[Roboto] text-[14px] text-black" onClick={() => setMenuOpen(false)}>
                 My Account
               </Link>
