@@ -1,4 +1,4 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npx supabase db push --project-ref zekmjeuqblbdhgiwdqjt && next build"
+  "buildCommand": "npx supabase link --project-ref zekmjeuqblbdhgiwdqjt --password $SUPABASE_DB_PASSWORD && npx supabase db push --linked && next build"
 }
