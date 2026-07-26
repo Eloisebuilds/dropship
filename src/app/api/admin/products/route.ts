@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, price, image_url, supplier_url, stock_quantity, cj_product_id, cj_variant_id, supplier_price, margin_percent } = body;
+    const { name, description, price, image_url, supplier_url, stock_quantity, cj_product_id, cj_variant_id, supplier_price, margin_percent, cj_sku, cj_spu, cj_images } = body;
 
     if (!name || !price) {
       return NextResponse.json({ error: "name and price are required" }, { status: 400 });
@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
         stock_quantity: stock_quantity ?? 10,
         cj_product_id: cj_product_id || null,
         cj_variant_id: cj_variant_id || null,
+        cj_last_synced_at: cj_product_id ? new Date().toISOString() : null,
         supplier_price: supplier_price || null,
         margin_percent: margin_percent ?? 30,
       })
@@ -56,6 +57,26 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    }
+
+    if (cj_product_id && data) {
+      const cjData: Record<string, unknown> = {
+        store_product_id: data.id,
+        cj_product_id,
+        cj_variant_id: cj_variant_id || null,
+        cj_sku: cj_sku || null,
+        cj_spu: cj_spu || null,
+        cj_image_url: image_url || null,
+        cj_sell_price: supplier_price || null,
+        cj_now_price: supplier_price || null,
+        warehouse_inventory: stock_quantity || 0,
+        last_synced_at: new Date().toISOString(),
+      };
+      if (cj_images) cjData.cj_images = cj_images;
+
+      await supabase.from("cj_products").upsert(cjData, {
+        onConflict: "store_product_id,cj_variant_id",
+      });
     }
 
     return NextResponse.json({ success: true, product: data });
