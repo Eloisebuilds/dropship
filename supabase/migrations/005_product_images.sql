@@ -44,3 +44,6 @@ create policy "Authenticated upload product-images" on storage.objects for inser
 create policy "Authenticated delete product-images" on storage.objects for delete using (
   bucket_id = 'product-images' and auth.role() = 'authenticated'
 );
+
+-- Refresh schema cache so REST API picks up new table & bucket
+notify pgrst, 'reload schema';
