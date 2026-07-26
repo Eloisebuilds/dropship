@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, price, image_url, supplier_url, stock_quantity, cj_product_id, cj_variant_id, supplier_price, margin_percent, cj_sku, cj_spu, cj_images } = body;
+    const { name, description, price, image_url, supplier_url, stock_quantity, cj_product_id, cj_variant_id, supplier_price, margin_percent, cj_sku, cj_spu } = body;
 
     if (!name || !price) {
       return NextResponse.json({ error: "name and price are required" }, { status: 400 });
@@ -72,11 +72,27 @@ export async function POST(request: NextRequest) {
         warehouse_inventory: stock_quantity || 0,
         last_synced_at: new Date().toISOString(),
       };
-      if (cj_images) cjData.cj_images = cj_images;
 
       await supabase.from("cj_products").upsert(cjData, {
         onConflict: "store_product_id,cj_variant_id",
       });
+
+      if (image_url) {
+        const { count } = await supabase
+          .from("product_images")
+          .select("id", { count: "exact", head: true })
+          .eq("product_id", data.id);
+
+        if (count === 0) {
+          await supabase.from("product_images").insert({
+            product_id: data.id,
+            url: image_url,
+            alt: name,
+            position: 0,
+            is_remote: true,
+          });
+        }
+      }
     }
 
     return NextResponse.json({ success: true, product: data });
