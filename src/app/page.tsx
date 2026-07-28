@@ -1,16 +1,40 @@
 "use client";
 
 import Image from "next/image";
-import { product } from "@/lib/products";
+import { useEffect, useState } from "react";
+import { fetchProducts } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import { useState } from "react";
 import { useCurrency, formatPrice } from "@/lib/currency";
+
+const FALLBACK: Product = {
+  id: "mop-001",
+  name: "360° Microfiber Floor Mop",
+  tagline: "Clean Smarter. Not Harder.",
+  description:
+    "The 360° Microfiber Floor Mop combines a flexible rotating head, built-in cleaner tank, and self-cleaning wringing system into one lightweight tool. Designed for every floor type — hardwood, tile, laminate, and more.",
+  price: 15.00,
+  originalPrice: 29.95,
+  image: "/7.png",
+  gallery: ["/7.png"],
+  category: "Home Cleaning",
+  badge: "Best Seller",
+};
 
 export default function Home() {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const currency = useCurrency();
+  const [product, setProduct] = useState<Product>(FALLBACK);
+
+  useEffect(() => {
+    fetchProducts().then((all) => {
+      if (all.length > 0) {
+        setProduct(all[0]);
+      }
+    });
+  }, []);
 
   const handleAdd = () => {
     addItem(product, "One Size", "Standard");
@@ -39,14 +63,16 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 text-center px-4 max-w-[700px]">
-          <p className="font-[Roboto] font-bold text-[12px] text-white/70 mb-4 tracking-wide">
-            BEST SELLER
-          </p>
+          {product.badge && (
+            <p className="font-[Roboto] font-bold text-[12px] text-white/70 mb-4 tracking-wide uppercase">
+              {product.badge}
+            </p>
+          )}
           <h1 className="font-[Montserrat] font-bold text-[36px] md:text-[48px] leading-[1.1] text-white mb-6">
-            CLEAN SMARTER. NOT HARDER.
+            {product.tagline}
           </h1>
           <p className="font-[Roboto] text-[16px] text-white/80 mb-8 leading-[24px] max-w-[480px] mx-auto">
-            The 360° Microfiber Floor Mop. Wet &amp; dry cleaning, self-cleaning system, and a built-in tank — all in one tool.
+            {product.description}
           </p>
           <a
             href="#product-buy"
@@ -140,7 +166,7 @@ export default function Home() {
           <div className="flex items-center justify-center">
             <Image
               src="/2.png"
-              alt="360° Microfiber Floor Mop"
+              alt={product.name}
               width={1254}
               height={1254}
               className="w-full h-auto max-w-[420px] object-contain"
@@ -149,10 +175,10 @@ export default function Home() {
           <div>
             <p className="font-[Roboto] font-bold text-[12px] text-[#2563EB] mb-3 tracking-wide uppercase">Why FavorItems</p>
             <h2 className="font-[Montserrat] font-bold text-[28px] md:text-[30px] text-black mb-3">
-              Clean Smarter. Not Harder.
+              {product.tagline}
             </h2>
             <p className="font-[Roboto] text-[14px] text-[#6B7280] mb-8 max-w-[480px] leading-[19.6px]">
-              The 360° Microfiber Floor Mop is engineered to make floor cleaning faster, easier, and more effective.
+              {product.description}
             </p>
             <div className="grid grid-cols-2 gap-3">
               {[
