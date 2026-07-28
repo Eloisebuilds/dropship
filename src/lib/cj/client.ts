@@ -148,16 +148,6 @@ export class CJClient {
       }
     }
 
-    if (data.variantInventories) {
-      for (const entry of data.variantInventories) {
-        if (entry.inventory) {
-          for (const inv of entry.inventory) {
-            total += inv.totalInventory || 0;
-          }
-        }
-      }
-    }
-
     return total;
   }
 
