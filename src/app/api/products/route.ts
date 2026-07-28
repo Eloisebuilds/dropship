@@ -35,7 +35,7 @@ export async function GET() {
         }
 
         for (const product of list) {
-          if (!product.image_url && imageMap[product.id]) {
+          if (imageMap[product.id]) {
             product.image_url = imageMap[product.id];
           }
         }

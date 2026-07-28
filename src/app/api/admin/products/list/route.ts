@@ -49,7 +49,7 @@ export async function GET() {
       }
 
       for (const p of list) {
-        if (!p.image_url && imageMap[p.id]) {
+        if (imageMap[p.id]) {
           p.image_url = imageMap[p.id];
         }
       }
