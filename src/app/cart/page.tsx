@@ -13,7 +13,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
-  const currency = useCurrency();
+  const { currency } = useCurrency();
   const supabase = createClient();
   const [checkingOut, setCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);

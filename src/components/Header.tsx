@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth/context";
 import { useState, useRef, useEffect } from "react";
+import { useCurrency, TOP_CURRENCIES } from "@/lib/currency";
 
 export default function Header() {
   const { itemCount } = useCart();
@@ -15,11 +16,19 @@ export default function Header() {
   const ADMIN_EMAIL = "uaerealprojects@gmail.com";
   const isAdmin = user?.email === ADMIN_EMAIL;
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
+  const { currency, setCurrency } = useCurrency();
+  const [currencyOpen, setCurrencyOpen] = useState(false);
+  const currencyRef = useRef<HTMLDivElement>(null);
+
+  const current = TOP_CURRENCIES.find((c) => c.code === currency) || TOP_CURRENCIES[0];
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
+      }
+      if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) {
+        setCurrencyOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -50,6 +59,42 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          {/* Currency toggle */}
+          <div className="relative" ref={currencyRef}>
+            <button
+              onClick={() => setCurrencyOpen(!currencyOpen)}
+              className="flex items-center gap-1 font-[Roboto] text-[13px] text-black hover:text-[#6B7280] transition-colors"
+            >
+              <span className="w-[18px] text-center">{current.symbol}</span>
+              <span>{currency}</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${currencyOpen ? "rotate-180" : ""}`}>
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {currencyOpen && (
+              <div className="absolute right-0 top-full mt-2 w-[200px] bg-white border border-[#E5E7EB] rounded-[8px] shadow-lg overflow-hidden z-50">
+                {TOP_CURRENCIES.map((c) => (
+                  <button
+                    key={c.code}
+                    onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 font-[Roboto] text-[13px] text-left hover:bg-[#F9FAFB] transition-colors ${
+                      currency === c.code ? "bg-[#F3F4F6] font-bold" : ""
+                    }`}
+                  >
+                    <span className="text-[16px]">{c.flag}</span>
+                    <span className="text-[#6B7280] w-[40px]">{c.code}</span>
+                    <span className="text-black flex-1">{c.symbol}</span>
+                    {currency === c.code && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <Link href="/cart" className="relative font-[Roboto] text-[14px] font-bold text-black hover:text-[#6B7280] transition-colors">
             CART
             {itemCount > 0 && (

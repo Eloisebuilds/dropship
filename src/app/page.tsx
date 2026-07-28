@@ -25,7 +25,7 @@ export default function Home() {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const currency = useCurrency();
+  const { currency } = useCurrency();
   const [product, setProduct] = useState<Product>(FALLBACK);
 
   useEffect(() => {
@@ -113,10 +113,6 @@ export default function Home() {
 
             <div className="flex items-baseline gap-3 mb-6">
               <span className="font-[Roboto] font-bold text-[24px] text-black">{formatPrice(product.price, currency)}</span>
-              <span className="font-[Roboto] text-[16px] text-[#6B7280] line-through">{formatPrice(product.originalPrice, currency)}</span>
-              <span className="font-[Roboto] font-bold text-[12px] text-[#B91C1C]">
-                Save {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-              </span>
             </div>
 
             <p className="font-[Roboto] text-[14px] text-[#6B7280] leading-[19.6px] mb-6">

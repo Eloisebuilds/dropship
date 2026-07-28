@@ -7,6 +7,7 @@ import CookieBanner from "@/components/CookieBanner";
 import ChatWidget from "@/components/ChatWidget";
 import { CartProvider } from "@/lib/cart";
 import { AuthProvider } from "@/lib/auth/context";
+import { CurrencyProvider } from "@/lib/currency";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${montserrat.variable} ${anton.variable} ${roboto.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
         <AuthProvider>
+        <CurrencyProvider>
         <CartProvider>
           <Header />
           <main className="flex-1">{children}</main>
@@ -43,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CookieBanner />
           <ChatWidget />
         </CartProvider>
+        </CurrencyProvider>
         </AuthProvider>
       </body>
     </html>
