@@ -14,7 +14,9 @@ export async function GET() {
       return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
     }
 
-    const ids = products.map((p) => p.id);
+    const list = products || [];
+    const ids = list.map((p) => p.id);
+
     const { data: cjData } = await supabase
       .from("cj_products")
       .select("store_product_id, warehouse_inventory")
@@ -30,7 +32,30 @@ export async function GET() {
       }
     }
 
-    const result = products.map((p) => ({
+    const { data: firstImages } = await supabase
+      .from("product_images")
+      .select("product_id, url")
+      .in("product_id", ids)
+      .order("position", { ascending: true });
+
+    if (firstImages) {
+      const seen = new Set<string>();
+      const imageMap: Record<string, string> = {};
+      for (const img of firstImages) {
+        if (!seen.has(img.product_id)) {
+          seen.add(img.product_id);
+          imageMap[img.product_id] = img.url;
+        }
+      }
+
+      for (const p of list) {
+        if (!p.image_url && imageMap[p.id]) {
+          p.image_url = imageMap[p.id];
+        }
+      }
+    }
+
+    const result = list.map((p) => ({
       ...p,
       warehouse_inventory: invMap.get(p.id) ?? null,
     }));
