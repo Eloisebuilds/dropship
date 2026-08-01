@@ -128,6 +128,7 @@ export interface CJOrderCreateResponse {
     orderAmount: string;
     cjPayUrl: string;
     orderStatus: string;
+    logisticsMiss?: boolean;
     productInfoList: {
       storeLineItemId: string;
       lineItemId: string;

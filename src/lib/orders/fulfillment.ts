@@ -70,7 +70,7 @@ export interface FulfillmentResult {
  * created but never gets a shipment order (logisticsMiss=true), so the
  * balance payment can never succeed.
  */
-async function getValidFreightOption(cj: NonNullable<ReturnType<typeof getCJClient>>, params: FulfillmentParams): Promise<CJFreightOption | null> {
+async function getValidFreightOption(cj: NonNullable<ReturnType<typeof getCJClient>>, params: FulfillmentParams): Promise<{ option: CJFreightOption | null; all: string[] }> {
   try {
     const res = await cj.freightCalculate({
       startCountryCode: "CN",
@@ -82,13 +82,13 @@ async function getValidFreightOption(cj: NonNullable<ReturnType<typeof getCJClie
     });
     const options = res.data || [];
     console.log("[fulfillment] freight options ->", JSON.stringify(options.map((o) => ({ name: o.logisticName, price: o.logisticPrice, aging: o.logisticAging }))));
-    if (options.length === 0) return null;
+    if (options.length === 0) return { option: null, all: [] };
     const cheapest = options.reduce((best, cur) => (cur.logisticPrice ?? Infinity) < (best.logisticPrice ?? Infinity) ? cur : best);
     console.log("[fulfillment] freight picked ->", cheapest.logisticName, cheapest.logisticPrice);
-    return cheapest;
+    return { option: cheapest, all: options.map((o) => o.logisticName) };
   } catch (error) {
     console.log("[fulfillment] freightCalculate failed:", error instanceof Error ? error.message : error);
-    return null;
+    return { option: null, all: [] };
   }
 }
 
@@ -99,7 +99,8 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
   }
 
   try {
-    const freightOptions = await getValidFreightOption(cj, params);
+    const freight = await getValidFreightOption(cj, params);
+    const logisticName = freight.option?.logisticName || "CJPacket Ordinary";
 
     const result = await cj.createOrder({
       orderNumber: params.orderId,
@@ -112,7 +113,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
       shippingPhone: params.shipping.phone || params.customer.phone || "",
       shippingZip: params.shipping.zip || "",
       email: params.customer.email,
-      logisticName: freightOptions?.logisticName || "CJPacket Ordinary",
+      logisticName,
       fromCountryCode: "CN",
       isSandbox: process.env.CJ_SANDBOX_TEST === "1" || process.env.NODE_ENV === "development" ? 1 : 0,
       products: params.items.map((item) => ({
@@ -133,6 +134,16 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
         cjPayUrl: null,
         balancePaid: false,
         error: "CJ order created without orderId",
+      };
+    }
+
+    if (result.data?.logisticsMiss === true) {
+      return {
+        cjOrderId,
+        cjOrderStatus: "NO_LOGISTICS",
+        cjPayUrl: null,
+        balancePaid: false,
+        error: `CJ: no logistics match for destination (requested "${logisticName}", options: ${freight.all.length ? freight.all.join(", ") : "none"})`,
       };
     }
 
