@@ -125,6 +125,8 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
 
     const cjOrderId = result.data?.orderId || null;
     const cjOrderStatus = result.data?.orderStatus || "CREATED";
+    const d = result.data ?? {};
+    const dataSummary = `orderId=${cjOrderId} shipmentOrderId=${d.shipmentOrderId ?? "null"} payId=${d.payId ?? "null"} actualPayment=${d.actualPayment ?? "null"} logisticsMiss=${d.logisticsMiss ?? "false"} orderStatus=${d.orderStatus ?? "null"}`;
     console.log("[fulfillment] createOrderV3 ->", JSON.stringify(result.data ?? result));
 
     if (!cjOrderId) {
@@ -143,11 +145,21 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
         cjOrderStatus: "NO_LOGISTICS",
         cjPayUrl: null,
         balancePaid: false,
-        error: `CJ: no logistics match for destination (requested "${logisticName}", options: ${freight.all.length ? freight.all.join(", ") : "none"})`,
+        error: `CJ: no logistics match for destination (requested "${logisticName}", options: ${freight.all.length ? freight.all.join(", ") : "none"}) (${dataSummary})`,
       };
     }
 
-    const cjShipmentOrderId = result.data?.shipmentOrderId || cjOrderId;
+    const cjShipmentOrderId = result.data?.shipmentOrderId || null;
+
+    if (!cjShipmentOrderId) {
+      return {
+        cjOrderId,
+        cjOrderStatus: "NO_SHIPMENT_ORDER",
+        cjPayUrl: result.data?.cjPayUrl || null,
+        balancePaid: false,
+        error: `CJ: no shipment order yet (${dataSummary})`,
+      };
+    }
 
     await cj.addCart({ orderNumber: params.orderId, orderId: cjOrderId });
     await cj.confirmCart({ orderNumber: params.orderId, orderId: cjOrderId });
@@ -165,6 +177,13 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
       console.log("[fulfillment] generateParentOrder ->", JSON.stringify(parentOrder.data ?? parentOrder));
     } catch (e) {
       console.log("[fulfillment] generateParentOrder failed:", e instanceof Error ? e.message : e);
+      return {
+        cjOrderId,
+        cjOrderStatus,
+        cjPayUrl,
+        balancePaid: false,
+        error: `${e instanceof Error ? e.message : "generateParentOrder failed"} (${dataSummary})`,
+      };
     }
 
     try {
