@@ -194,20 +194,21 @@ export class CJClient {
   }
 
   async confirmCart(orderData: { orderNumber: string; orderId: string }) {
-    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/addCartConfirm", {
+    return this.request<{ code: number; result: boolean; message: string; data: { shipmentsId?: string; successCount?: number; submitSuccess?: boolean } }>("POST", "/shopping/order/addCartConfirm", {
       cjOrderIdList: [orderData.orderId],
     });
   }
 
-  async generateParentOrder(orderData: { orderNumber: string; orderId: string }) {
-    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/saveGenerateParentOrder", {
-      shipmentOrderId: orderData.orderId,
+  async generateParentOrder(orderData: { shipmentOrderId: string }) {
+    return this.request<{ code: number; result: boolean; message: string; data: { payId?: string; submitSuccess?: boolean; paymentInformation?: { payableAmount?: number; actualPayment?: number } } }>("POST", "/shopping/order/saveGenerateParentOrder", {
+      shipmentOrderId: orderData.shipmentOrderId,
     });
   }
 
-  async payBalance(orderData: { shipmentOrderId: string }) {
+  async payBalance(orderData: { shipmentOrderId: string; payId?: string }) {
     return this.request<{ code: number; result: boolean; message: string; data: Record<string, unknown> }>("POST", "/shopping/pay/payBalanceV2", {
       shipmentOrderId: orderData.shipmentOrderId,
+      ...(orderData.payId ? { payId: orderData.payId } : {}),
     });
   }
 

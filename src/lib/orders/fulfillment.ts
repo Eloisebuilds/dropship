@@ -149,7 +149,11 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
       };
     }
 
-    const cjShipmentOrderId = result.data?.shipmentOrderId || null;
+    await cj.addCart({ orderNumber: params.orderId, orderId: cjOrderId });
+    const cartConfirm = await cj.confirmCart({ orderNumber: params.orderId, orderId: cjOrderId });
+    console.log("[fulfillment] addCart+confirmCart ->", JSON.stringify(cartConfirm.data ?? cartConfirm));
+
+    const cjShipmentOrderId = cartConfirm.data?.shipmentsId || null;
 
     if (!cjShipmentOrderId) {
       return {
@@ -157,23 +161,17 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
         cjOrderStatus: "NO_SHIPMENT_ORDER",
         cjPayUrl: result.data?.cjPayUrl || null,
         balancePaid: false,
-        error: `CJ: no shipment order yet (${dataSummary})`,
+        error: `CJ: no shipment order yet (confirm response: ${JSON.stringify(cartConfirm.data ?? cartConfirm)}; create: ${dataSummary})`,
       };
     }
 
-    await cj.addCart({ orderNumber: params.orderId, orderId: cjOrderId });
-    await cj.confirmCart({ orderNumber: params.orderId, orderId: cjOrderId });
-    console.log("[fulfillment] addCart+confirmCart ok, shipmentOrderId =", cjShipmentOrderId);
-
     let cjPayUrl: string | null = null;
+    let parentPayId: string | null = null;
     let balancePaid = false;
 
     try {
-      const parentOrder = await cj.generateParentOrder({
-        orderNumber: params.orderId,
-        orderId: cjShipmentOrderId,
-      });
-      cjPayUrl = (parentOrder.data as { cjPayUrl?: string } | null)?.cjPayUrl || null;
+      const parentOrder = await cj.generateParentOrder({ shipmentOrderId: cjShipmentOrderId });
+      parentPayId = parentOrder.data?.payId || null;
       console.log("[fulfillment] generateParentOrder ->", JSON.stringify(parentOrder.data ?? parentOrder));
     } catch (e) {
       console.log("[fulfillment] generateParentOrder failed:", e instanceof Error ? e.message : e);
@@ -182,13 +180,14 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
         cjOrderStatus,
         cjPayUrl,
         balancePaid: false,
-        error: `${e instanceof Error ? e.message : "generateParentOrder failed"} (${dataSummary})`,
+        error: `${e instanceof Error ? e.message : "generateParentOrder failed"} (shipmentOrderId=${cjShipmentOrderId})`,
       };
     }
 
     try {
-      const payResult = await cj.payBalance({ shipmentOrderId: cjShipmentOrderId });
+      const payResult = await cj.payBalance({ shipmentOrderId: cjShipmentOrderId, payId: parentPayId || undefined });
       balancePaid = payResult.result !== false;
+      console.log("[fulfillment] payBalance ->", JSON.stringify(payResult));
       if (!balancePaid) {
         return {
           cjOrderId,
