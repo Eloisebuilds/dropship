@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { formatPrice } from "@/lib/currency";
+import { formatAmountInCurrency } from "@/lib/currency-config";
 import Link from "next/link";
 
 interface Order {
@@ -10,7 +10,9 @@ interface Order {
   customer_name: string;
   customer_email: string;
   total: number;
+  currency: string | null;
   status: string;
+  payment_status: string | null;
   created_at: string;
   cj_order_status: string | null;
   cj_tracking_number: string | null;
@@ -29,7 +31,7 @@ export default function AdminOrders() {
       const supabase = createClient();
       const { data } = await supabase
         .from("orders")
-        .select("id, customer_name, customer_email, total, status, created_at, cj_order_status, cj_tracking_number")
+        .select("id, customer_name, customer_email, total, currency, status, payment_status, created_at, cj_order_status, cj_tracking_number")
         .order("created_at", { ascending: false });
       if (data) setOrders(data);
       setLoading(false);
@@ -88,6 +90,7 @@ export default function AdminOrders() {
                   <th className="text-left font-[Roboto] text-[12px] text-[#6B7280] font-bold px-4 py-3">Customer</th>
                   <th className="text-left font-[Roboto] text-[12px] text-[#6B7280] font-bold px-4 py-3">Date</th>
                   <th className="text-left font-[Roboto] text-[12px] text-[#6B7280] font-bold px-4 py-3">Status</th>
+                  <th className="text-left font-[Roboto] text-[12px] text-[#6B7280] font-bold px-4 py-3">Payment</th>
                   <th className="text-left font-[Roboto] text-[12px] text-[#6B7280] font-bold px-4 py-3">CJ</th>
                   <th className="text-right font-[Roboto] text-[12px] text-[#6B7280] font-bold px-4 py-3">Total</th>
                   <th className="px-4 py-3" />
@@ -115,8 +118,17 @@ export default function AdminOrders() {
                         {order.status}
                       </span>
                     </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-block font-[Roboto] text-[11px] font-bold px-2 py-0.5 rounded ${
+                        order.payment_status === "paid" ? "bg-[#D1FAE5] text-[#065F46]" :
+                        order.payment_status === "refunded" ? "bg-[#FEE2E2] text-[#991B1B]" :
+                        "bg-[#FEF3C7] text-[#92400E]"
+                      }`}>
+                        {order.payment_status === "paid" ? "Paid" : order.payment_status === "refunded" ? "Refunded" : "Unpaid"}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 font-[Roboto] text-[12px] text-[#6B7280]">{order.cj_order_status || "—"}</td>
-                    <td className="px-4 py-3 text-right font-[Roboto] text-[13px] text-black font-bold">{formatPrice(order.total, "USD")}</td>
+                    <td className="px-4 py-3 text-right font-[Roboto] text-[13px] text-black font-bold">{formatAmountInCurrency(order.total, order.currency || "usd")}</td>
                     <td className="px-4 py-3 text-right">
                       <Link href={`/admin/orders/${order.id}`} className="font-[Roboto] text-[12px] text-[#6B7280] underline hover:text-black">
                         View

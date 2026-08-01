@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useCart } from "@/lib/cart";
 import { useCurrency, formatPrice } from "@/lib/currency";
 import { useAuth } from "@/lib/auth/context";
-import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -14,120 +14,63 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
   const { currency } = useCurrency();
-  const supabase = createClient();
-  const [checkingOut, setCheckingOut] = useState(false);
+  const [email, setEmail] = useState("");
+  const [startingCheckout, setStartingCheckout] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [loadedAddress, setLoadedAddress] = useState(false);
-
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    province: "",
-    zip: "",
-    country: "United States",
-    countryCode: "US",
-  });
-
-  const updateField = (field: string, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const [checkoutMode, setCheckoutMode] = useState(false);
 
   useEffect(() => {
-    if (authLoading || loadedAddress) return;
-    if (!user) return;
-
-    const saved = user.user_metadata?.last_shipping_address;
-    setForm((prev) => ({
-      ...prev,
-      name: saved?.name || user.user_metadata?.full_name || prev.name || user.email?.split("@")[0] || "",
-      email: saved?.email || user.email || prev.email || "",
-      phone: saved?.phone || prev.phone || "",
-      address: saved?.address || prev.address || "",
-      city: saved?.city || prev.city || "",
-      province: saved?.province || prev.province || "",
-      zip: saved?.zip || prev.zip || "",
-      country: saved?.country || prev.country || "United States",
-      countryCode: saved?.countryCode || prev.countryCode || "US",
-    }));
-    setLoadedAddress(true);
-  }, [user, authLoading, loadedAddress]);
+    if (authLoading) return;
+    setEmail(user?.email || user?.user_metadata?.last_shipping_address?.email || "");
+  }, [user, authLoading]);
 
   const handleCheckout = async () => {
-    const errors: string[] = [];
-    if (!form.name.trim()) errors.push("Full name");
-    if (!form.email.trim()) errors.push("Email");
-    else if (!EMAIL_REGEX.test(form.email)) errors.push("Valid email");
-    if (!form.address.trim()) errors.push("Street address");
-    if (!form.city.trim()) errors.push("City");
-    if (!form.zip.trim()) errors.push("ZIP / Postal code");
-
-    if (errors.length > 0) {
-      setCheckoutError(`Please fill in: ${errors.join(", ")}.`);
+    if (!email.trim() || !EMAIL_REGEX.test(email.trim())) {
+      setCheckoutError("Please enter a valid email address.");
       return;
     }
 
-    setCheckingOut(true);
+    setStartingCheckout(true);
     setCheckoutError(null);
 
     try {
-      const res = await fetch("/api/orders/create", {
+      const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items,
-          customer: {
-            email: form.email,
-            name: form.name,
-            phone: form.phone,
-          },
-          shipping: {
-            address: form.address,
-            city: form.city,
-            province: form.province,
-            country: form.country,
-            countryCode: form.countryCode,
-            zip: form.zip,
-            phone: form.phone,
-          },
+          items: items.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+          })),
+          email: email.trim(),
+          currency,
         }),
       });
 
       const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.error || "Checkout failed");
+        throw new Error(data.error || "Failed to start checkout");
       }
 
-      if (user) {
-        const addressData = {
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          address: form.address,
-          city: form.city,
-          province: form.province,
-          zip: form.zip,
-          country: form.country,
-          countryCode: form.countryCode,
-        };
-        await supabase.auth.updateUser({
-          data: { last_shipping_address: addressData },
-        });
+      const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      if (!publishableKey) {
+        throw new Error("Stripe is not configured");
       }
 
-      if (data.redirectUrl) {
-        clearCart();
-        window.location.href = data.redirectUrl;
-      } else {
-        clearCart();
-        window.location.href = `/order-confirmation/${data.orderId}`;
+      const stripe = await loadStripe(publishableKey);
+      if (!stripe) {
+        throw new Error("Failed to load payment provider");
       }
+
+      const checkout = await stripe.createEmbeddedCheckoutPage({
+        fetchClientSecret: async () => data.clientSecret,
+      });
+
+      setCheckoutMode(true);
+      checkout.mount("#embedded-checkout");
     } catch (error: unknown) {
-      setCheckoutError(error instanceof Error ? error.message : "Checkout failed. Please try again.");
-    } finally {
-      setCheckingOut(false);
+      setCheckoutError(error instanceof Error ? error.message : "Failed to start checkout. Please try again.");
+      setStartingCheckout(false);
     }
   };
 
@@ -145,6 +88,23 @@ export default function CartPage() {
         >
           View Product
         </Link>
+      </div>
+    );
+  }
+
+  if (checkoutMode) {
+    return (
+      <div className="max-w-[900px] mx-auto px-4 md:px-6 py-12 md:py-16">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="font-[Montserrat] font-bold text-[28px] md:text-[30px] text-black">Checkout</h1>
+          <button
+            onClick={() => window.location.reload()}
+            className="font-[Roboto] text-[12px] text-[#6B7280] hover:text-black transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+        <div id="embedded-checkout" className="min-h-[600px]" />
       </div>
     );
   }
@@ -239,83 +199,18 @@ export default function CartPage() {
           </div>
 
           <div className="border border-[#E5E7EB] rounded-[8px] p-6 bg-white">
-            <h2 className="font-[Montserrat] font-bold text-[17px] text-black mb-4">Shipping Details</h2>
+            <h2 className="font-[Montserrat] font-bold text-[17px] text-black mb-4">Contact</h2>
             <div className="flex flex-col gap-3">
-              <input
-                type="text"
-                placeholder="Full Name *"
-                value={form.name}
-                onChange={(e) => updateField("name", e.target.value)}
-                className="w-full h-[40px] border border-[#E5E7EB] rounded-[4px] px-3 font-[Roboto] text-[14px] text-black outline-none focus:border-black transition-colors"
-              />
               <input
                 type="email"
                 placeholder="Email *"
-                value={form.email}
-                onChange={(e) => updateField("email", e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-[40px] border border-[#E5E7EB] rounded-[4px] px-3 font-[Roboto] text-[14px] text-black outline-none focus:border-black transition-colors"
               />
-              <input
-                type="tel"
-                placeholder="Phone"
-                value={form.phone}
-                onChange={(e) => updateField("phone", e.target.value)}
-                className="w-full h-[40px] border border-[#E5E7EB] rounded-[4px] px-3 font-[Roboto] text-[14px] text-black outline-none focus:border-black transition-colors"
-              />
-              <input
-                type="text"
-                placeholder="Street Address *"
-                value={form.address}
-                onChange={(e) => updateField("address", e.target.value)}
-                className="w-full h-[40px] border border-[#E5E7EB] rounded-[4px] px-3 font-[Roboto] text-[14px] text-black outline-none focus:border-black transition-colors"
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  placeholder="City *"
-                  value={form.city}
-                  onChange={(e) => updateField("city", e.target.value)}
-                  className="w-full h-[40px] border border-[#E5E7EB] rounded-[4px] px-3 font-[Roboto] text-[14px] text-black outline-none focus:border-black transition-colors"
-                />
-                <input
-                  type="text"
-                  placeholder="State / Province"
-                  value={form.province}
-                  onChange={(e) => updateField("province", e.target.value)}
-                  className="w-full h-[40px] border border-[#E5E7EB] rounded-[4px] px-3 font-[Roboto] text-[14px] text-black outline-none focus:border-black transition-colors"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  placeholder="ZIP / Postal Code"
-                  value={form.zip}
-                  onChange={(e) => updateField("zip", e.target.value)}
-                  className="w-full h-[40px] border border-[#E5E7EB] rounded-[4px] px-3 font-[Roboto] text-[14px] text-black outline-none focus:border-black transition-colors"
-                />
-                <select
-                  value={form.countryCode}
-                  onChange={(e) => {
-                    const codes: Record<string, string> = {
-                      US: "United States", GB: "United Kingdom", CA: "Canada",
-                      AU: "Australia", DE: "Germany", FR: "France",
-                      IT: "Italy", ES: "Spain", NL: "Netherlands",
-                      BR: "Brazil", JP: "Japan", CN: "China",
-                    };
-                    updateField("countryCode", e.target.value);
-                    updateField("country", codes[e.target.value] || e.target.value);
-                  }}
-                  className="w-full h-[40px] border border-[#E5E7EB] rounded-[4px] px-3 font-[Roboto] text-[14px] text-black outline-none focus:border-black transition-colors bg-white"
-                >
-                  {["US", "GB", "CA", "AU", "DE", "FR", "IT", "ES", "NL", "BR", "JP", "CN"].map(
-                    (code) => (
-                      <option key={code} value={code}>
-                        {code}
-                      </option>
-                    )
-                  )}
-                </select>
-              </div>
+              <p className="font-[Roboto] text-[12px] text-[#6B7280]">
+                Shipping details and payment are completed securely in the next step.
+              </p>
             </div>
           </div>
 
@@ -325,10 +220,10 @@ export default function CartPage() {
 
           <button
             onClick={handleCheckout}
-            disabled={checkingOut}
+            disabled={startingCheckout}
             className="w-full h-[48px] bg-black text-white font-[Roboto] font-bold text-[14px] rounded-[4px] hover:bg-[#6B7280] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {checkingOut ? "Processing..." : "Place Order"}
+            {startingCheckout ? "Preparing checkout..." : "Continue to Payment"}
           </button>
 
           <Link

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/currency";
+import { formatAmountInCurrency } from "@/lib/currency-config";
 import Link from "next/link";
 
 const STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"];
@@ -13,13 +14,18 @@ interface Order {
   customer_name: string;
   shipping_address: string;
   status: string;
+  payment_status: string | null;
   total: number;
+  currency: string | null;
   created_at: string;
   updated_at: string;
   cj_order_id: string | null;
   cj_order_status: string | null;
   cj_tracking_number: string | null;
   cj_logistic_name: string | null;
+  stripe_session_id: string | null;
+  stripe_payment_intent_id: string | null;
+  paid_at: string | null;
   error_message: string | null;
 }
 
@@ -173,8 +179,17 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
                 </p>
               </div>
               <div>
+                <p className="font-[Roboto] text-[12px] text-[#6B7280]">Payment</p>
+                <p className={`font-[Roboto] text-[14px] font-bold mt-0.5 ${
+                  order.payment_status === "paid" ? "text-[#065F46]" :
+                  order.payment_status === "refunded" ? "text-[#991B1B]" : "text-[#92400E]"
+                }`}>
+                  {order.payment_status === "paid" ? "Paid" : order.payment_status === "refunded" ? "Refunded" : "Unpaid"}
+                </p>
+              </div>
+              <div>
                 <p className="font-[Roboto] text-[12px] text-[#6B7280]">Total</p>
-                <p className="font-[Roboto] text-[14px] text-black font-bold mt-0.5">{formatPrice(order.total, "USD")}</p>
+                <p className="font-[Roboto] text-[14px] text-black font-bold mt-0.5">{formatAmountInCurrency(order.total, order.currency || "usd")}</p>
               </div>
               <div>
                 <p className="font-[Roboto] text-[12px] text-[#6B7280]">Date</p>
@@ -215,6 +230,34 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
                   <div>
                     <p className="font-[Roboto] text-[12px] text-[#6B7280]">Tracking</p>
                     <p className="font-[Roboto] text-[13px] text-black mt-0.5">{order.cj_tracking_number}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {(order.stripe_session_id || order.stripe_payment_intent_id) && (
+            <div className="bg-white border border-[#E5E7EB] rounded-[8px] p-5">
+              <h2 className="font-[Montserrat] font-bold text-[17px] text-black mb-3">Stripe Payment</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {order.paid_at && (
+                  <div>
+                    <p className="font-[Roboto] text-[12px] text-[#6B7280]">Paid At</p>
+                    <p className="font-[Roboto] text-[13px] text-black mt-0.5">
+                      {new Date(order.paid_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                )}
+                {order.stripe_session_id && (
+                  <div>
+                    <p className="font-[Roboto] text-[12px] text-[#6B7280]">Session</p>
+                    <p className="font-[Roboto] text-[11px] text-[#6B7280] mt-0.5 break-all">{order.stripe_session_id}</p>
+                  </div>
+                )}
+                {order.stripe_payment_intent_id && (
+                  <div>
+                    <p className="font-[Roboto] text-[12px] text-[#6B7280]">Payment Intent</p>
+                    <p className="font-[Roboto] text-[11px] text-[#6B7280] mt-0.5 break-all">{order.stripe_payment_intent_id}</p>
                   </div>
                 )}
               </div>

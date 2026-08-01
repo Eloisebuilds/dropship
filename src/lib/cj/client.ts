@@ -190,11 +190,10 @@ export class CJClient {
     return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/saveGenerateParentOrder", orderData);
   }
 
-  async payBalance(orderData: { orderId: string; payType: number }) {
-    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/pay/payBalanceV2", {
-      ...orderData,
+  async payBalance(orderData: { shipmentOrderId: string }) {
+    return this.request<{ code: number; result: boolean; message: string; data: Record<string, unknown> }>("POST", "/pay/payBalanceV2", {
+      shipmentOrderId: orderData.shipmentOrderId,
       payPassword: "",
-      payType: orderData.payType || 1,
     });
   }
 

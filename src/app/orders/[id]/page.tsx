@@ -5,6 +5,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/context";
 import { formatPrice } from "@/lib/currency";
+import { formatAmountInCurrency } from "@/lib/currency-config";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -15,6 +16,8 @@ interface Order {
   shipping_address: string;
   status: string;
   total: number;
+  currency: string | null;
+  payment_status: string | null;
   created_at: string;
   cj_order_id: string | null;
   cj_order_status: string | null;
@@ -126,7 +129,17 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
           <div>
             <p className="font-[Roboto] text-[12px] text-[#6B7280] mb-1">Total</p>
-            <p className="font-[Roboto] text-[14px] text-black font-bold">{formatPrice(order.total, "USD")}</p>
+            <p className="font-[Roboto] text-[14px] text-black font-bold">
+              {formatAmountInCurrency(order.total, order.currency || "usd")}
+            </p>
+          </div>
+          <div>
+            <p className="font-[Roboto] text-[12px] text-[#6B7280] mb-1">Payment</p>
+            <p className={`font-[Roboto] text-[14px] font-bold ${
+              order.payment_status === "paid" ? "text-[#065F46]" : "text-[#92400E]"
+            }`}>
+              {order.payment_status === "paid" ? "Paid" : order.payment_status === "refunded" ? "Refunded" : "Pending"}
+            </p>
           </div>
         </div>
 
@@ -166,7 +179,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   <p className="font-[Roboto] text-[12px] text-[#6B7280]">Variant: {item.cj_variant_id}</p>
                 )}
               </div>
-              <span className="font-[Roboto] text-[14px] text-black font-bold ml-4 shrink-0">{formatPrice(item.price * item.quantity, "USD")}</span>
+              <span className="font-[Roboto] text-[14px] text-black font-bold ml-4 shrink-0">{formatPrice(item.price * item.quantity, (order.currency || "USD").toUpperCase())}</span>
             </div>
           </div>
         ))}

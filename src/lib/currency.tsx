@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { CURRENCY_RATES, SUPPORTED_CURRENCIES } from "./currency-config";
 
 const STORAGE_KEY = "favoritems_currency";
 
@@ -19,24 +20,18 @@ export const TOP_CURRENCIES = [
 
 type CurrencyCode = (typeof TOP_CURRENCIES)[number]["code"];
 
-const CURRENCY_MAP: Record<string, { symbol: string; rate: number }> = {
-  EUR: { symbol: "€", rate: 1 },
-  USD: { symbol: "$", rate: 1.08 },
-  GBP: { symbol: "£", rate: 0.86 },
-  JPY: { symbol: "¥", rate: 163.5 },
-  CNY: { symbol: "¥", rate: 7.85 },
-  AUD: { symbol: "AU$", rate: 1.65 },
-  CAD: { symbol: "CA$", rate: 1.47 },
-  CHF: { symbol: "CHF", rate: 0.97 },
-  INR: { symbol: "₹", rate: 90.2 },
-  KRW: { symbol: "₩", rate: 1450 },
-};
+const CURRENCY_MAP: Record<string, { symbol: string; rate: number }> = Object.fromEntries(
+  Object.keys(CURRENCY_RATES).map((code) => [
+    code,
+    { symbol: code === "USD" ? "$" : code === "GBP" ? "£" : code === "JPY" || code === "CNY" ? "¥" : code === "AUD" ? "AU$" : code === "CAD" ? "CA$" : code === "CHF" ? "CHF" : code === "INR" ? "₹" : code === "KRW" ? "₩" : "€", rate: CURRENCY_RATES[code] },
+  ])
+);
 
 function getInitialCurrency(): string {
   if (typeof window === "undefined") return "EUR";
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && CURRENCY_MAP[saved]) return saved;
+    if (saved && SUPPORTED_CURRENCIES.includes(saved)) return saved;
   } catch {}
   return "EUR";
 }
