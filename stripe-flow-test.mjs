@@ -85,6 +85,7 @@ function sessionFor(orderId, sessionId, { paid = true, amount, currency = "eur" 
 }
 
 const createdOrderIds = [];
+const createdSessionIds = [];
 
 // ---- 1. EUR checkout ----
 {
@@ -95,6 +96,7 @@ const createdOrderIds = [];
   });
   report("checkout EUR returns clientSecret", status === 200 && !!json.clientSecret, JSON.stringify(json).slice(0, 160));
   createdOrderIds.push(json.orderId);
+  createdSessionIds.push(json.sessionId);
   const session = await stripe.checkout.sessions.retrieve(json.sessionId, { expand: ["line_items"] });
   const li = session.line_items?.data?.[0];
   const unit = li ? Math.round(li.amount_total / li.quantity) : undefined;
@@ -113,6 +115,7 @@ let jpyOrderId = null;
   report("checkout JPY works", status === 200 && !!json.clientSecret, JSON.stringify(json).slice(0, 160));
   jpyOrderId = json.orderId;
   createdOrderIds.push(json.orderId);
+  createdSessionIds.push(json.sessionId);
   const session = await stripe.checkout.sessions.retrieve(json.sessionId, { expand: ["line_items"] });
   const unit = session.line_items?.data?.[0]?.amount_total;
   const { data: dbOrder } = await supabase.from("orders").select("total, currency").eq("id", jpyOrderId).single();
@@ -151,6 +154,7 @@ let successOrderId = null;
   });
   successOrderId = json.orderId;
   createdOrderIds.push(json.orderId);
+  createdSessionIds.push(json.sessionId);
   const session = await stripe.checkout.sessions.retrieve(json.sessionId);
 
   // 4a. not-paid event
@@ -182,6 +186,10 @@ let successOrderId = null;
 {
   const { error } = await supabase.from("orders").delete().in("id", createdOrderIds);
   report("test orders cleaned up", !error, error ? error.message : `${createdOrderIds.length} deleted`);
+  for (const sid of createdSessionIds) {
+    try { await stripe.checkout.sessions.expire(sid); } catch {}
+  }
+  console.log(`expired ${createdSessionIds.length} checkout sessions`);
 }
 
 console.log("\n=== SUMMARY ===");

@@ -187,7 +187,10 @@ export class CJClient {
   }
 
   async generateParentOrder(orderData: { orderNumber: string; orderId: string }) {
-    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/saveGenerateParentOrder", orderData);
+    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/saveGenerateParentOrder", {
+      orderNumber: orderData.orderNumber,
+      cjOrderIdList: [orderData.orderId],
+    });
   }
 
   async payBalance(orderData: { shipmentOrderId: string }) {
