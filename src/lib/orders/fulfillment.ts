@@ -93,6 +93,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
 
     const cjOrderId = result.data?.orderId || null;
     const cjOrderStatus = result.data?.orderStatus || "CREATED";
+    console.log("[fulfillment] createOrderV3 ->", JSON.stringify(result.data ?? result));
 
     if (!cjOrderId) {
       return {
@@ -108,6 +109,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
 
     await cj.addCart({ orderNumber: params.orderId, orderId: cjOrderId });
     await cj.confirmCart({ orderNumber: params.orderId, orderId: cjOrderId });
+    console.log("[fulfillment] addCart+confirmCart ok, shipmentOrderId =", cjShipmentOrderId);
 
     let cjPayUrl: string | null = null;
     let balancePaid = false;
@@ -118,8 +120,9 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
         orderId: cjShipmentOrderId,
       });
       cjPayUrl = (parentOrder.data as { cjPayUrl?: string } | null)?.cjPayUrl || null;
-    } catch {
-      // Parent order generation is best-effort; balance payment still applies.
+      console.log("[fulfillment] generateParentOrder ->", JSON.stringify(parentOrder.data ?? parentOrder));
+    } catch (e) {
+      console.log("[fulfillment] generateParentOrder failed:", e instanceof Error ? e.message : e);
     }
 
     try {
