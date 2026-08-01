@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchProducts } from "@/lib/products";
 import type { Product } from "@/lib/products";
@@ -74,12 +75,12 @@ export default function Home() {
           <p className="font-[Roboto] text-[16px] text-white/80 mb-8 leading-[24px] max-w-[480px] mx-auto">
             {product.description}
           </p>
-          <a
-            href="#product-buy"
+          <Link
+            href="/cart"
             className="inline-block bg-white text-black font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#E5E7EB] transition-colors"
           >
             Shop Now — {formatPrice(product.price, currency)}
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -481,15 +482,12 @@ export default function Home() {
           <p className="font-[Roboto] text-[16px] text-[#6B7280] mb-8 max-w-[480px] mx-auto leading-[24px]">
             Join thousands who&apos;ve already made the switch.
           </p>
-          <button
-            onClick={() => {
-              handleAdd();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
+          <Link
+            href="/cart"
             className="inline-block bg-white text-black font-[Roboto] font-bold text-[14px] rounded-[4px] px-8 py-3 hover:bg-[#E5E7EB] transition-colors"
           >
-            Add to Cart — {formatPrice(product.price, currency)}
-          </button>
+            Shop Now — {formatPrice(product.price, currency)}
+          </Link>
         </div>
       </section>
     </div>
