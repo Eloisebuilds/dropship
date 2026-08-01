@@ -67,7 +67,7 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
         <div className="flex justify-between">
           <span className="font-[Roboto] text-[12px] text-[#6B7280]">Total</span>
           <span className="font-[Roboto] font-bold text-[14px] text-black">
-            {formatAmountInCurrency(Number(order.total), order.currency || "usd")}
+            {formatAmountInCurrency(Number(order.total), order.currency || "eur")}
           </span>
         </div>
       </div>

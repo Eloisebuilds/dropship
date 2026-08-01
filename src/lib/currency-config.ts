@@ -13,6 +13,31 @@ export const CURRENCY_RATES: Record<string, number> = {
 
 export const SUPPORTED_CURRENCIES = Object.keys(CURRENCY_RATES);
 
+const MINOR_UNIT_DECIMALS: Record<string, number> = {
+  EUR: 2,
+  USD: 2,
+  GBP: 2,
+  JPY: 0,
+  CNY: 2,
+  AUD: 2,
+  CAD: 2,
+  CHF: 2,
+  INR: 2,
+  KRW: 0,
+};
+
+export function getMinorUnitDecimals(currency: string): number {
+  return MINOR_UNIT_DECIMALS[currency.toUpperCase()] ?? 2;
+}
+
+export function toMinorUnits(amountInMajor: number, currency: string): number {
+  return Math.round(amountInMajor * Math.pow(10, getMinorUnitDecimals(currency)));
+}
+
+export function fromMinorUnits(amountInMinor: number, currency: string): number {
+  return amountInMinor / Math.pow(10, getMinorUnitDecimals(currency));
+}
+
 export function convertFromEur(baseEur: number, currency: string): number {
   const rate = CURRENCY_RATES[currency];
   if (!rate) return baseEur;
@@ -40,7 +65,7 @@ export function formatPrice(baseEur: number, currency: string): string {
 }
 
 export function formatAmountInCurrency(amount: number, currency: string): string {
-  const code = (currency || "usd").toUpperCase();
+  const code = (currency || "eur").toUpperCase();
   const symbol =
     code === "USD" ? "$"
     : code === "GBP" ? "£"

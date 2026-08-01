@@ -130,7 +130,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           <div>
             <p className="font-[Roboto] text-[12px] text-[#6B7280] mb-1">Total</p>
             <p className="font-[Roboto] text-[14px] text-black font-bold">
-              {formatAmountInCurrency(order.total, order.currency || "usd")}
+              {formatAmountInCurrency(order.total, order.currency || "eur")}
             </p>
           </div>
           <div>
@@ -179,7 +179,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   <p className="font-[Roboto] text-[12px] text-[#6B7280]">Variant: {item.cj_variant_id}</p>
                 )}
               </div>
-              <span className="font-[Roboto] text-[14px] text-black font-bold ml-4 shrink-0">{formatPrice(item.price * item.quantity, (order.currency || "USD").toUpperCase())}</span>
+              <span className="font-[Roboto] text-[14px] text-black font-bold ml-4 shrink-0">{formatPrice(item.price * item.quantity, (order.currency || "EUR").toUpperCase())}</span>
             </div>
           </div>
         ))}

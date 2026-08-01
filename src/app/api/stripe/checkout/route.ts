@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe";
-import { convertFromEur, SUPPORTED_CURRENCIES } from "@/lib/currency-config";
+import { convertFromEur, SUPPORTED_CURRENCIES, getMinorUnitDecimals } from "@/lib/currency-config";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const ALLOWED_COUNTRIES = [
   "US", "GB", "CA", "AU", "DE", "FR", "IT", "ES", "NL", "BR", "JP", "CN",
@@ -84,15 +86,19 @@ export async function POST(request: NextRequest) {
         quantity,
         name: product.name,
         priceEur,
-        unitAmount: Math.round(convertFromEur(priceEur, currency) * 100),
+        unitAmount: Math.round(convertFromEur(priceEur, currency) * Math.pow(10, getMinorUnitDecimals(currency))),
       });
     }
 
     const totalEur = lineItems.reduce((sum, li) => sum + li.priceEur * li.quantity, 0);
     const totalCharged = lineItems.reduce((sum, li) => sum + li.unitAmount * li.quantity, 0);
 
-    const email = (body.email || user?.email || "").trim();
+    const email = (body.email || user?.email || "").trim().toLowerCase();
+    if (!EMAIL_REGEX.test(email)) {
+      return NextResponse.json({ error: "A valid email is required" }, { status: 400 });
+    }
     const customerName = user?.user_metadata?.full_name || email.split("@")[0] || "Customer";
+    const minorUnitDecimals = getMinorUnitDecimals(currency);
 
     const { data: order, error: orderError } = await supabase
       .from("orders")
@@ -104,7 +110,7 @@ export async function POST(request: NextRequest) {
         status: "pending",
         payment_status: "unpaid",
         currency: currency.toLowerCase(),
-        total: totalCharged / 100,
+        total: totalCharged / Math.pow(10, minorUnitDecimals),
       })
       .select()
       .single();

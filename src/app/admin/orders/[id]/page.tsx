@@ -189,7 +189,7 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
               </div>
               <div>
                 <p className="font-[Roboto] text-[12px] text-[#6B7280]">Total</p>
-                <p className="font-[Roboto] text-[14px] text-black font-bold mt-0.5">{formatAmountInCurrency(order.total, order.currency || "usd")}</p>
+                <p className="font-[Roboto] text-[14px] text-black font-bold mt-0.5">{formatAmountInCurrency(order.total, order.currency || "eur")}</p>
               </div>
               <div>
                 <p className="font-[Roboto] text-[12px] text-[#6B7280]">Date</p>

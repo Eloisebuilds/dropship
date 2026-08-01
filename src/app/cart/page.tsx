@@ -6,23 +6,35 @@ import { useCurrency, formatPrice } from "@/lib/currency";
 import { useAuth } from "@/lib/auth/context";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, type StripeEmbeddedCheckout } from "@stripe/stripe-js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, total, clearCart } = useCart();
+  const { items, removeItem, updateQuantity, total } = useCart();
   const { user, loading: authLoading } = useAuth();
   const { currency } = useCurrency();
   const [email, setEmail] = useState("");
   const [startingCheckout, setStartingCheckout] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [checkoutMode, setCheckoutMode] = useState(false);
+  const [checkout, setCheckout] = useState<StripeEmbeddedCheckout | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
     setEmail(user?.email || user?.user_metadata?.last_shipping_address?.email || "");
   }, [user, authLoading]);
+
+  useEffect(() => {
+    if (checkoutMode && checkout) {
+      try {
+        checkout.mount("#embedded-checkout");
+      } catch (error) {
+        setCheckoutError(error instanceof Error ? error.message : "Failed to load checkout");
+        setCheckoutMode(false);
+      }
+    }
+  }, [checkoutMode, checkout]);
 
   const handleCheckout = async () => {
     if (!email.trim() || !EMAIL_REGEX.test(email.trim())) {
@@ -66,8 +78,8 @@ export default function CartPage() {
         fetchClientSecret: async () => data.clientSecret,
       });
 
+      setCheckout(checkout);
       setCheckoutMode(true);
-      checkout.mount("#embedded-checkout");
     } catch (error: unknown) {
       setCheckoutError(error instanceof Error ? error.message : "Failed to start checkout. Please try again.");
       setStartingCheckout(false);

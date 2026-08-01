@@ -1,5 +1,28 @@
 import { getCJClient } from "@/lib/cj/client";
 
+const COUNTRY_NAMES: Record<string, string> = {
+  US: "United States",
+  GB: "United Kingdom",
+  CA: "Canada",
+  AU: "Australia",
+  DE: "Germany",
+  FR: "France",
+  IT: "Italy",
+  ES: "Spain",
+  NL: "Netherlands",
+  BR: "Brazil",
+  JP: "Japan",
+  CN: "China",
+  CH: "Switzerland",
+  IN: "India",
+  KR: "South Korea",
+};
+
+function countryName(code?: string): string {
+  if (!code) return "United States";
+  return COUNTRY_NAMES[code.toUpperCase()] || code.toUpperCase();
+}
+
 interface FulfillmentItem {
   cjVariantId?: string;
   productId?: string;
@@ -50,7 +73,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
     const result = await cj.createOrder({
       orderNumber: params.orderId,
       shippingCountryCode: params.shipping.countryCode || "US",
-      shippingCountry: params.shipping.country || "United States",
+      shippingCountry: countryName(params.shipping.countryCode),
       shippingProvince: params.shipping.province || "N/A",
       shippingCity: params.shipping.city || "N/A",
       shippingAddress: params.shipping.address || "N/A",
@@ -60,7 +83,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
       email: params.customer.email,
       logisticName: "CJPacket Ordinary",
       fromCountryCode: "CN",
-      isSandbox: process.env.NODE_ENV === "development" ? 1 : 0,
+      isSandbox: process.env.CJ_SANDBOX_TEST === "1" || process.env.NODE_ENV === "development" ? 1 : 0,
       products: params.items.map((item) => ({
         vid: item.cjVariantId || item.productId || "",
         quantity: item.quantity,

@@ -128,7 +128,7 @@ export default function AdminOrders() {
                       </span>
                     </td>
                     <td className="px-4 py-3 font-[Roboto] text-[12px] text-[#6B7280]">{order.cj_order_status || "—"}</td>
-                    <td className="px-4 py-3 text-right font-[Roboto] text-[13px] text-black font-bold">{formatAmountInCurrency(order.total, order.currency || "usd")}</td>
+                    <td className="px-4 py-3 text-right font-[Roboto] text-[13px] text-black font-bold">{formatAmountInCurrency(order.total, order.currency || "eur")}</td>
                     <td className="px-4 py-3 text-right">
                       <Link href={`/admin/orders/${order.id}`} className="font-[Roboto] text-[12px] text-[#6B7280] underline hover:text-black">
                         View

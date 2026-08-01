@@ -4,7 +4,7 @@ import { getStripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { fulfillWithCJ } from "@/lib/orders/fulfillment";
 import { sendOrderConfirmationEmail } from "@/lib/resend";
-import { formatAmountInCurrency } from "@/lib/currency-config";
+import { formatAmountInCurrency, getMinorUnitDecimals, fromMinorUnits } from "@/lib/currency-config";
 
 export async function POST(request: NextRequest) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -58,7 +58,10 @@ export async function POST(request: NextRequest) {
     }
 
     const chargedCents = session.amount_total || 0;
-    const expectedCents = Math.round(parseFloat(order.total ?? "0") * 100);
+    const orderCurrency = (order.currency || session.currency || "eur").toLowerCase();
+    const expectedCents = Math.round(
+      parseFloat(order.total ?? "0") * Math.pow(10, getMinorUnitDecimals(orderCurrency))
+    );
     if (chargedCents !== expectedCents) {
       console.error("Amount mismatch:", session.id, chargedCents, expectedCents);
       await supabase
@@ -96,8 +99,8 @@ export async function POST(request: NextRequest) {
         payment_status: "paid",
         paid_at: new Date().toISOString(),
         status: "processing",
-        currency: (session.currency || "usd").toLowerCase(),
-        total: chargedCents / 100,
+        currency: orderCurrency,
+        total: fromMinorUnits(chargedCents, orderCurrency),
         stripe_session_id: session.id,
         stripe_payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id || null,
         customer_email: customerEmail,
@@ -162,24 +165,28 @@ export async function POST(request: NextRequest) {
     }
 
     if (customerEmail) {
-      const { data: firstItem } = await supabase
-        .from("order_items")
-        .select("products(name)")
-        .eq("order_id", order.id)
-        .limit(1)
-        .maybeSingle();
+      try {
+        const { data: firstItem } = await supabase
+          .from("order_items")
+          .select("products(name)")
+          .eq("order_id", order.id)
+          .limit(1)
+          .maybeSingle();
 
-      const productName =
-        (firstItem as unknown as { products: { name: string } | null } | null)?.products?.name || "Product";
+        const productName =
+          (firstItem as unknown as { products: { name: string } | null } | null)?.products?.name || "Product";
 
-      sendOrderConfirmationEmail(
-        customerEmail,
-        customerName,
-        order.id.slice(0, 8),
-        productName,
-        formatAmountInCurrency(chargedCents / 100, session.currency || "usd"),
-        `${process.env.NEXT_PUBLIC_SITE_URL || "https://shopfavoritems.com"}/order-confirmation/${order.id}`
-      );
+        await sendOrderConfirmationEmail(
+          customerEmail,
+          customerName,
+          order.id.slice(0, 8),
+          productName,
+          formatAmountInCurrency(fromMinorUnits(chargedCents, orderCurrency), orderCurrency),
+          `${process.env.NEXT_PUBLIC_SITE_URL || "https://shopfavoritems.com"}/order-confirmation/${order.id}`
+        );
+      } catch (emailError) {
+        console.warn("Failed to send confirmation email (non-fatal):", emailError);
+      }
     }
   }
 
