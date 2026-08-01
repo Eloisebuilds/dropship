@@ -64,6 +64,7 @@ export interface FulfillmentResult {
  * redirecting the customer. Errors are non-fatal: the order stays paid in our
  * DB and can be settled manually in the CJ dashboard.
  */
+
 /**
  * Queries valid logistics options for the order's destination and picks the
  * cheapest available carrier. Without a valid logistics name the CJ order is
@@ -81,13 +82,10 @@ async function getValidFreightOption(cj: NonNullable<ReturnType<typeof getCJClie
       })),
     });
     const options = res.data || [];
-    console.log("[fulfillment] freight options ->", JSON.stringify(options.map((o) => ({ name: o.logisticName, price: o.logisticPrice, aging: o.logisticAging }))));
     if (options.length === 0) return { option: null, all: [] };
     const cheapest = options.reduce((best, cur) => (cur.logisticPrice ?? Infinity) < (best.logisticPrice ?? Infinity) ? cur : best);
-    console.log("[fulfillment] freight picked ->", cheapest.logisticName, cheapest.logisticPrice);
     return { option: cheapest, all: options.map((o) => o.logisticName) };
-  } catch (error) {
-    console.log("[fulfillment] freightCalculate failed:", error instanceof Error ? error.message : error);
+  } catch {
     return { option: null, all: [] };
   }
 }
@@ -127,7 +125,6 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
     const cjOrderStatus = result.data?.orderStatus || "CREATED";
     const d = result.data ?? {};
     const dataSummary = `orderId=${cjOrderId} shipmentOrderId=${d.shipmentOrderId ?? "null"} payId=${d.payId ?? "null"} actualPayment=${d.actualPayment ?? "null"} logisticsMiss=${d.logisticsMiss ?? "false"} orderStatus=${d.orderStatus ?? "null"}`;
-    console.log("[fulfillment] createOrderV3 ->", JSON.stringify(result.data ?? result));
 
     if (!cjOrderId) {
       return {
@@ -151,7 +148,6 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
 
     await cj.addCart({ orderNumber: params.orderId, orderId: cjOrderId });
     const cartConfirm = await cj.confirmCart({ orderNumber: params.orderId, orderId: cjOrderId });
-    console.log("[fulfillment] addCart+confirmCart ->", JSON.stringify(cartConfirm.data ?? cartConfirm));
 
     const cjShipmentOrderId = cartConfirm.data?.shipmentsId || null;
 
@@ -172,9 +168,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
     try {
       const parentOrder = await cj.generateParentOrder({ shipmentOrderId: cjShipmentOrderId });
       parentPayId = parentOrder.data?.payId || null;
-      console.log("[fulfillment] generateParentOrder ->", JSON.stringify(parentOrder.data ?? parentOrder));
     } catch (e) {
-      console.log("[fulfillment] generateParentOrder failed:", e instanceof Error ? e.message : e);
       return {
         cjOrderId,
         cjOrderStatus,
@@ -187,7 +181,6 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
     try {
       const payResult = await cj.payBalance({ shipmentOrderId: cjShipmentOrderId, payId: parentPayId || undefined });
       balancePaid = payResult.result !== false;
-      console.log("[fulfillment] payBalance ->", JSON.stringify(payResult));
       if (!balancePaid) {
         return {
           cjOrderId,
