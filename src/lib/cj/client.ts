@@ -197,9 +197,8 @@ export class CJClient {
   }
 
   async payBalance(orderData: { shipmentOrderId: string }) {
-    return this.request<{ code: number; result: boolean; message: string; data: Record<string, unknown> }>("POST", "/pay/payBalanceV2", {
+    return this.request<{ code: number; result: boolean; message: string; data: Record<string, unknown> }>("POST", "/shopping/pay/payBalanceV2", {
       shipmentOrderId: orderData.shipmentOrderId,
-      payPassword: "",
     });
   }
 
