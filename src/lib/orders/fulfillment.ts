@@ -92,7 +92,6 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
     });
 
     const cjOrderId = result.data?.orderId || null;
-    const cjShipmentOrderId = result.data?.shipmentOrderId || cjOrderId;
     const cjOrderStatus = result.data?.orderStatus || "CREATED";
 
     if (!cjOrderId) {
@@ -104,6 +103,8 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
         error: "CJ order created without orderId",
       };
     }
+
+    const cjShipmentOrderId = result.data?.shipmentOrderId || cjOrderId;
 
     await cj.addCart({ orderNumber: params.orderId, orderId: cjOrderId });
     await cj.confirmCart({ orderNumber: params.orderId, orderId: cjOrderId });
