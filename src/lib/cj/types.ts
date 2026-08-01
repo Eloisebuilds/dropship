@@ -122,6 +122,7 @@ export interface CJOrderCreateResponse {
   data: {
     orderId: string;
     orderNumber: string;
+    shipmentOrderId: string;
     productAmount: string;
     postageAmount: string;
     orderAmount: string;

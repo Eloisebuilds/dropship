@@ -92,6 +92,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
     });
 
     const cjOrderId = result.data?.orderId || null;
+    const cjShipmentOrderId = result.data?.shipmentOrderId || cjOrderId;
     const cjOrderStatus = result.data?.orderStatus || "CREATED";
 
     if (!cjOrderId) {
@@ -113,7 +114,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
     try {
       const parentOrder = await cj.generateParentOrder({
         orderNumber: params.orderId,
-        orderId: cjOrderId,
+        orderId: cjShipmentOrderId,
       });
       cjPayUrl = (parentOrder.data as { cjPayUrl?: string } | null)?.cjPayUrl || null;
     } catch {
@@ -121,7 +122,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
     }
 
     try {
-      const payResult = await cj.payBalance({ shipmentOrderId: cjOrderId });
+      const payResult = await cj.payBalance({ shipmentOrderId: cjShipmentOrderId });
       balancePaid = payResult.result !== false;
       if (!balancePaid) {
         return {
