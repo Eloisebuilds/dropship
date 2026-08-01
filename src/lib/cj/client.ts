@@ -5,6 +5,7 @@ import {
   CJVariant,
   CJInventoryByPidResponse,
   CJOrderCreateResponse,
+  CJFreightResponse,
 } from "./types";
 
 const BASE_URL = "https://developers.cjdropshipping.com/api2.0/v1";
@@ -134,6 +135,14 @@ export class CJClient {
     const params = new URLSearchParams({ pid });
     const res = await this.request<CJInventoryByPidResponse>("GET", `/product/stock/getInventoryByPid?${params}`);
     return res.data || null;
+  }
+
+  async freightCalculate(params: {
+    startCountryCode: string;
+    endCountryCode: string;
+    products: { vid: string; quantity: number }[];
+  }) {
+    return this.request<CJFreightResponse>("POST", "/logistic/freightCalculate", params);
   }
 
   async getTotalInventory(pid: string): Promise<number> {

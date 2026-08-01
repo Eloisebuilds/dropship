@@ -1,4 +1,5 @@
 import { getCJClient } from "@/lib/cj/client";
+import type { CJFreightOption } from "@/lib/cj/types";
 
 const COUNTRY_NAMES: Record<string, string> = {
   US: "United States",
@@ -63,6 +64,34 @@ export interface FulfillmentResult {
  * redirecting the customer. Errors are non-fatal: the order stays paid in our
  * DB and can be settled manually in the CJ dashboard.
  */
+/**
+ * Queries valid logistics options for the order's destination and picks the
+ * cheapest available carrier. Without a valid logistics name the CJ order is
+ * created but never gets a shipment order (logisticsMiss=true), so the
+ * balance payment can never succeed.
+ */
+async function getValidFreightOption(cj: NonNullable<ReturnType<typeof getCJClient>>, params: FulfillmentParams): Promise<CJFreightOption | null> {
+  try {
+    const res = await cj.freightCalculate({
+      startCountryCode: "CN",
+      endCountryCode: params.shipping.countryCode || "US",
+      products: params.items.map((item) => ({
+        vid: item.cjVariantId || item.productId || "",
+        quantity: item.quantity,
+      })),
+    });
+    const options = res.data || [];
+    console.log("[fulfillment] freight options ->", JSON.stringify(options.map((o) => ({ name: o.logisticName, price: o.logisticPrice, aging: o.logisticAging }))));
+    if (options.length === 0) return null;
+    const cheapest = options.reduce((best, cur) => (cur.logisticPrice ?? Infinity) < (best.logisticPrice ?? Infinity) ? cur : best);
+    console.log("[fulfillment] freight picked ->", cheapest.logisticName, cheapest.logisticPrice);
+    return cheapest;
+  } catch (error) {
+    console.log("[fulfillment] freightCalculate failed:", error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
 export async function fulfillWithCJ(params: FulfillmentParams): Promise<FulfillmentResult> {
   const cj = getCJClient();
   if (!cj) {
@@ -70,6 +99,8 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
   }
 
   try {
+    const freightOptions = await getValidFreightOption(cj, params);
+
     const result = await cj.createOrder({
       orderNumber: params.orderId,
       shippingCountryCode: params.shipping.countryCode || "US",
@@ -81,7 +112,7 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
       shippingPhone: params.shipping.phone || params.customer.phone || "",
       shippingZip: params.shipping.zip || "",
       email: params.customer.email,
-      logisticName: "CJPacket Ordinary",
+      logisticName: freightOptions?.logisticName || "CJPacket Ordinary",
       fromCountryCode: "CN",
       isSandbox: process.env.CJ_SANDBOX_TEST === "1" || process.env.NODE_ENV === "development" ? 1 : 0,
       products: params.items.map((item) => ({

@@ -137,6 +137,22 @@ export interface CJOrderCreateResponse {
   };
 }
 
+export interface CJFreightOption {
+  logisticAging: string | null;
+  logisticPrice: number | null;
+  logisticPriceCn: number | null;
+  logisticName: string;
+  taxesFee?: number | null;
+  totalPostageFee?: number | null;
+}
+
+export interface CJFreightResponse {
+  code: number;
+  result: boolean;
+  message?: string;
+  data?: CJFreightOption[] | null;
+}
+
 export interface CJWebhookPayload {
   messageId: string;
   type: "PRODUCT" | "VARIANT" | "STOCK" | "ORDER" | "LOGISTIC" | "MAKEUP" | "PRIVATE_ORDER" | "ORDERSPLIT" | "SOURCINGCREATE";
