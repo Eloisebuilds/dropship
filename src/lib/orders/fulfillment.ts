@@ -117,25 +117,29 @@ export async function fulfillWithCJ(params: FulfillmentParams): Promise<Fulfillm
       });
       cjPayUrl = (parentOrder.data as { cjPayUrl?: string } | null)?.cjPayUrl || null;
     } catch {
-      // Parent order generation is best-effort in balance-payment mode.
+      // Parent order generation is best-effort; balance payment still applies.
     }
 
-    if (cjPayUrl) {
-      try {
-        const payResult = await cj.payBalance({ shipmentOrderId: cjOrderId });
-        balancePaid = payResult.result !== false;
-        if (!balancePaid) {
-          throw new Error(payResult.message || "CJ balance payment failed");
-        }
-      } catch (payError) {
+    try {
+      const payResult = await cj.payBalance({ shipmentOrderId: cjOrderId });
+      balancePaid = payResult.result !== false;
+      if (!balancePaid) {
         return {
           cjOrderId,
           cjOrderStatus,
           cjPayUrl,
           balancePaid: false,
-          error: payError instanceof Error ? payError.message : "CJ balance payment failed",
+          error: payResult.message || "CJ balance payment failed",
         };
       }
+    } catch (payError) {
+      return {
+        cjOrderId,
+        cjOrderStatus,
+        cjPayUrl,
+        balancePaid: false,
+        error: payError instanceof Error ? payError.message : "CJ balance payment failed",
+      };
     }
 
     return { cjOrderId, cjOrderStatus, cjPayUrl, balancePaid };

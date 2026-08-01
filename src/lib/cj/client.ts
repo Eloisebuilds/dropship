@@ -179,17 +179,20 @@ export class CJClient {
   }
 
   async addCart(orderData: { orderNumber: string; orderId: string }) {
-    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/addCart", orderData);
+    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/addCart", {
+      cjOrderIdList: [orderData.orderId],
+    });
   }
 
   async confirmCart(orderData: { orderNumber: string; orderId: string }) {
-    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/addCartConfirm", orderData);
+    return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/addCartConfirm", {
+      cjOrderIdList: [orderData.orderId],
+    });
   }
 
   async generateParentOrder(orderData: { orderNumber: string; orderId: string }) {
     return this.request<{ code: number; result: boolean; data: Record<string, unknown> }>("POST", "/shopping/order/saveGenerateParentOrder", {
-      orderNumber: orderData.orderNumber,
-      cjOrderIdList: [orderData.orderId],
+      shipmentOrderId: orderData.orderId,
     });
   }
 
